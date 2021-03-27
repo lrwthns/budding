@@ -1,0 +1,87 @@
+html {
+    height: 100%;
+    width: 100%;
+}
+body {
+    height: 100%;
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 4fr;
+    grid-template-rows: 1fr;
+    margin: 0;
+    padding: 0;
+    height: 100%;
+}
+
+#navigation-bar {
+    grid-column: 1/2;
+    grid-row: 1/2;
+    background-color: rgb(43, 43, 43);
+    box-sizing: border-box;
+}
+
+#dynamic-display {
+    grid-column: 2/3;
+    grid-row: 1/2;
+    /* Permalink - use to edit and share this gradient: https://colorzilla.com/gradient-editor/#e5e5e5+0,e5e5e5+50,e5e5e5+50,d2f2b5+100 */
+    background: rgb(229,229,229); /* Old browsers */
+    background: -moz-linear-gradient(left,  rgba(229,229,229,1) 0%, rgba(229,229,229,1) 50%, rgba(229,229,229,1) 50%, rgba(210,242,181,1) 100%); /* FF3.6-15 */
+    background: -webkit-linear-gradient(left,  rgba(229,229,229,1) 0%,rgba(229,229,229,1) 50%,rgba(229,229,229,1) 50%,rgba(210,242,181,1) 100%); /* Chrome10-25,Safari5.1-6 */
+    background: linear-gradient(to right,  rgba(229,229,229,1) 0%,rgba(229,229,229,1) 50%,rgba(229,229,229,1) 50%,rgba(210,242,181,1) 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#e5e5e5', endColorstr='#d2f2b5',GradientType=1 ); /* IE6-9 */
+    display: grid;
+    grid-template-rows: 1fr 5fr;
+    padding: 0rem 5rem;
+}
+
+#app-logo {
+    padding: 2rem;
+    font-size: 5rem;
+    font-family: 'Lobster Two', cursive;
+    color: rgb(229,229,229);
+    text-align: center;
+}
+
+#nav-today, #nav-this-week {
+    color: rgb(229,229,229);
+    font-size: 1.5rem;
+    font-family: 'Karla', sans-serif;
+    padding: 1rem;
+}
+
+#project-container {
+    margin: 2rem 0rem;
+}
+
+#project-headline {
+    color: rgb(229,229,229);
+    font-size: 2rem;
+    font-family: 'Karla', sans-serif;
+    padding: 1rem;
+}
+
+.nav-project {
+    color: rgb(229,229,229);
+    font-size: 1.5rem;
+    font-family: 'Karla', sans-serif;
+    padding: 1rem;
+}
+
+#np-container {
+    padding: 1rem;
+}
+
+#np-form-container {
+    display: none;
+}
+
+#dd-project-title {
+    grid-row: 1/2;
+    box-sizing: border-box;
+    align-self: center;
+    padding: 3rem 3rem;
+    color: rgb(43, 43, 43);
+    font-size: 3rem;
+    font-family: 'Karla', sans-serif;
+    padding: 1rem;
+}
