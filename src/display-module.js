@@ -5,25 +5,23 @@ function displayAppLogo (container) {
     appLogo.setAttribute('id', 'app-logo');
 }
 
-function createTodayElement (container) {
-    const todayElement = document.createElement('div');
-
-    container.appendChild(todayElement);
-
-    todayElement.setAttribute('id', 'nav-today');
-
-    todayElement.textContent = 'Today';
-
+function createNavElement (container, text, id) {
+    const element = document.createElement('div');
+    container.appendChild(element);
+    element.setAttribute('id', id);
+    element.textContent = text;
+    return element;
 }
 
-function createThisWeekElement (container) {
-    const thisWeekElement = document.createElement('div');
-
-    container.appendChild(thisWeekElement);
-
-    thisWeekElement.setAttribute('id', 'nav-this-week');
-
-    thisWeekElement.textContent = 'This Week';
+function createNavbarElements (container) {
+    const homeElement = createNavElement(container, 'Home', 'nav-home')
+    const todayElement = createNavElement(container, 'Today', 'nav-today');
+    const thisWeekElement = createNavElement(container, 'This Week', 'nav-this-week');
+    return {
+        homeElement,
+        todayElement,
+        thisWeekElement
+    }
 }
 
 function createProject (name, container) {
@@ -36,7 +34,7 @@ function createProject (name, container) {
     project.textContent = name;
 }
 
-function createNewProjectButton (container) {
+function createProjectButton (container) {
     const newProject = document.createElement('div');
     const newProjectButton = document.createElement('button');
     const newProjectForm = document.createElement('form');
@@ -56,25 +54,28 @@ function createNewProjectButton (container) {
     newProjectForm.setAttribute('id', 'np-form-container');
     formInput.setAttribute('id', 'np-form-input');
     formInput.setAttribute('type', 'text');
+    formInput.setAttribute('placeholder', 'project name');
     formInput.setAttribute('required', '');
     formSubmit.setAttribute('id', 'np-form-submit');
     formSubmit.setAttribute('type', 'submit');
+    formCancel.setAttribute('id', 'np-form-cancel')
 
-    newProjectButton.textContent = 'Add New Project';
+    newProjectButton.innerHTML = '<span class="material-icons">add</span>' + 'Add Project';
     formSubmit.textContent = 'Submit';
     formCancel.textContent = 'Cancel';
 
     newProjectButton.addEventListener('click', () => {
-        newProjectForm.style.display = 'block';
+        newProjectForm.style.display = 'grid';
         newProjectButton.style.display = 'none';
     })
 
     formCancel.addEventListener('click', () => {
         newProjectForm.style.display = 'none';
-        newProjectButton.style.display = 'block';
+        newProjectButton.style.display = 'flex';
     })
 }
 
+//Displays projects in nav-bar
 function displayProjects (container) {
     const projectContainer = document.createElement('div');
     const projectHeadline = document.createElement('div');
@@ -86,12 +87,13 @@ function displayProjects (container) {
 
     projectHeadline.textContent = 'Projects';
 
-    createNewProjectButton(container);
+    createProjectButton(container);
     createProject('Work', projectContainer);
     createProject('Gardening', projectContainer);
 
 }
 
+//Displays current project title in dynamic display
 function displayProjectTitle (name, container) {
     let projectTitle = document.createElement('div');
 
@@ -102,26 +104,156 @@ function displayProjectTitle (name, container) {
     projectTitle.textContent = name;
 }
 
+function createTaskPopUp (container) {
+    const popUpContainer = document.createElement('div');
+    const popUp = document.createElement('div');
+    const titleInput = document.createElement('input');
+    const detailsInput = document.createElement('input');
+    const dueDateInput = document.createElement('input');
+    const priorityInput = document.createElement('div');
+    const submitButton = document.createElement('button');
+    const priorityLabel = document.createElement('div');
+    const low = document.createElement('div');
+    const medium = document.createElement('div');
+    const high = document.createElement('div');
+    
+    container.appendChild(popUpContainer);
+    popUpContainer.appendChild(popUp);
+    popUp.appendChild(titleInput);
+    popUp.appendChild(detailsInput);
+    popUp.appendChild(dueDateInput);
+    popUp.appendChild(priorityInput);
+    popUp.appendChild(submitButton);
+    priorityInput.appendChild(priorityLabel);
+    priorityInput.appendChild(low);
+    priorityInput.appendChild(medium);
+    priorityInput.appendChild(high);
+
+    popUpContainer.setAttribute('id', 'pop-up-container');
+    popUp.setAttribute('id', 'pop-up');
+    titleInput.setAttribute('id', 'title-input');
+    titleInput.setAttribute('placeholder', 'Title');
+    detailsInput.setAttribute('id', 'details-input');
+    detailsInput.setAttribute('placeholder', 'Details');
+    dueDateInput.setAttribute('id', 'due-date-input');
+    dueDateInput.setAttribute('placeholder', 'Due Date');
+    dueDateInput.setAttribute('type', 'date');
+    priorityInput.setAttribute('id', 'priority-input');
+    priorityInput.setAttribute('placeholder', 'Priority');
+    submitButton.setAttribute('id', 'pop-up-submit');
+    priorityLabel.setAttribute('id', 'priority-label');
+    low.setAttribute('id', 'priority-low');
+    medium.setAttribute('id', 'priority-medium');
+    high.setAttribute('id', 'priority-high');
+
+    submitButton.textContent = 'Submit';
+    priorityLabel.textContent = 'Priority';
+    low.textContent = 'LOW';
+    medium.textContent = 'MEDIUM';
+    high.textContent = 'HIGH';
+
+    submitButton.addEventListener('click', () => {
+        popUpContainer.style.display = 'none';
+    })
+    low.addEventListener('click', () => {
+        low.setAttribute('id', 'priority-low-checked');
+        medium.setAttribute('id', 'priority-medium');
+        high.setAttribute('id', 'priority-high');
+    })
+    medium.addEventListener('click', () => {
+        low.setAttribute('id', 'priority-low');
+        medium.setAttribute('id', 'priority-medium-checked');
+        high.setAttribute('id', 'priority-high');
+    })
+    high.addEventListener('click', () => {
+        low.setAttribute('id', 'priority-low');
+        medium.setAttribute('id', 'priority-medium');
+        high.setAttribute('id', 'priority-high-checked');
+    })
+};
+
+function createAddTaskButton (container) {
+    const addTaskButton = document.createElement('button');
+
+    container.appendChild(addTaskButton);
+
+    addTaskButton.setAttribute('id', 'add-task-button');
+
+    addTaskButton.innerHTML = '<span class="material-icons">add</span>' + 'Add Task';
+
+    addTaskButton.addEventListener('click', () => {
+        createTaskPopUp(container);
+    })
+    
+}
+
 function createTask (name, date, container) {
-    let task = document.createElement('div');
+    let task = document.createElement('li');
+    let taskLeftSide = document.createElement('div')
+    let taskRightSide = document.createElement('div');
+    let taskCheckbox = document.createElement('span');
+    let taskDesc = document.createElement('div');
+    let taskPriority = document.createElement('div');
+    let taskDueDate = document.createElement('div');
+    let taskEdit = document.createElement('span');
+    let taskDelete = document.createElement('span');
 
     container.appendChild(task);
+    task.appendChild(taskLeftSide);
+    taskLeftSide.appendChild(taskPriority);
+    taskLeftSide.appendChild(taskCheckbox);
+    taskLeftSide.appendChild(taskDesc);
+    task.appendChild(taskRightSide);
+    taskRightSide.appendChild(taskDueDate);
+    taskRightSide.appendChild(taskEdit);
+    taskRightSide.appendChild(taskDelete);
 
-    task.classList.add('tasks');
+    task.classList.add('user-tasks');
+    taskCheckbox.classList.add('material-icons');
+    taskEdit.classList.add('material-icons');
+    taskDelete.classList.add('material-icons');
+    taskPriority.setAttribute('id', 'task-priority');
+    taskLeftSide.setAttribute('id', 'task-left-side');
+    taskDesc.setAttribute('id', 'task-desc');
+    taskRightSide.setAttribute('id', 'task-right-side');
+    taskDueDate.setAttribute('id', 'task-due-date');
+
+    taskCheckbox.textContent = 'radio_button_unchecked';
+    taskDesc.textContent = name;
+    taskDueDate.textContent = date;
+    taskEdit.textContent = 'edit';
+    taskDelete.textContent = 'delete';
+
+    taskCheckbox.addEventListener('click', () => {
+        if (taskCheckbox.textContent == 'radio_button_unchecked') {
+            taskCheckbox.textContent = 'check_circle';
+            taskDesc.setAttribute('id', 'task-desc-checked');
+            taskDueDate.setAttribute('id', 'task-due-date-checked');
+        }
+        else {
+            taskCheckbox.textContent = 'radio_button_unchecked';
+            taskDesc.setAttribute('id', 'task-desc');
+            taskDueDate.setAttribute('id', 'task-due-date');
+        }
+    })
 
 }
 
-function displayTasks () {
-
+function displayTasks (container) {
+    const taskContainer = document.createElement('div');
+    container.appendChild(taskContainer);
+    createTask('Print files', '03-04-2021', taskContainer);
+    createTask('Call clients', '05-04-2021', taskContainer);
 }
 
 export function displayNavbar () {
     const navbar = document.querySelector('#navigation-bar');
     const dynamicDisplay = document.querySelector('#dynamic-display');
     displayAppLogo(navbar);
-    createTodayElement(navbar);
-    createThisWeekElement(navbar);
+    createNavbarElements(navbar);
     displayProjects(navbar);
     displayProjectTitle('Work', dynamicDisplay);
+    createAddTaskButton (dynamicDisplay);
+    displayTasks(dynamicDisplay);
 }
 
