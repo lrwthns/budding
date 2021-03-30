@@ -54,14 +54,11 @@ body {
     color: rgb(43, 43, 43);
 }
 
-#project-container {
-    margin: 2rem 0rem;
-}
-
 #project-headline {
     color: rgb(229,229,229);
     font-size: 2rem;
     font-family: 'Karla', sans-serif;
+    margin-top: 2rem;
     padding: 1rem;
 }
 
@@ -179,7 +176,7 @@ body {
     right: 0;
     bottom: 0;
     background-color: rgba(0, 0, 0, 0.5);
-    display: grid;
+    display: none;
 }
 
 #pop-up {
@@ -241,7 +238,7 @@ body {
     margin-right: 1rem;
 }
 
-#priority-input {
+#priority-div {
     box-sizing: border-box;
     grid-column: 2/3;
     grid-row: 3/4;
@@ -253,7 +250,7 @@ body {
     grid-template-rows: 1fr;
 }
 
-#priority-input div {
+#priority-div div {
     box-sizing: border-box;
     font-size: 1rem;
     font-family: 'Karla', sans-serif;
@@ -346,6 +343,8 @@ body {
     grid-template-columns: 1fr 1fr;
     height: 3rem; 
     align-content: center;
+    margin-bottom: 1rem;
+    background-color: rgba(187, 212, 164, 0.2);
 }
 
 .user-tasks:hover {
@@ -362,16 +361,33 @@ body {
 
 #task-left-side {
     grid-column: 1/2;
-    display: flex;
+    display: grid;
+    grid-template-columns: 0.3fr 0.7fr 9fr;
+    align-items: center;
 }
 
-#task-priority {
-    margin-left: 0.5rem;
-    margin-right: 0.5rem;
-    width: 0.5rem;
-    height: 80%;
-    align-self: center;
-    background-color: green;
+#task-priority-low {
+    width: 0.3rem;
+    height: 3rem;
+    background-color: rgb(0, 184, 0);
+}
+
+#task-priority-medium {
+    width: 0.3rem;
+    height: 3rem;
+    background-color: orange;
+}
+
+#task-priority-high {
+    width: 0.3rem;
+    height: 3rem;
+    background-color: rgb(228, 0, 0);
+}
+
+#task-priority-checked {
+    width: 0.3rem;
+    height: 3rem;
+    background-color: grey;
 }
 
 #task-desc-checked {
@@ -381,16 +397,18 @@ body {
 
 #task-right-side {
     grid-column: 2/3;
-    justify-self: end;
-    display: flex;
+    display: grid;
+    grid-template-columns: 9fr 0.5fr 0.5fr;
+    align-items: center;
 }
 
 #task-due-date {
     margin-right: 1rem;
+    justify-self: end;
 }
 
 #task-due-date-checked {
     margin-right: 1rem;
-    text-decoration: line-through;
+    justify-self: end;
     color: grey;
 }
