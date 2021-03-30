@@ -89,14 +89,21 @@ function displayProjects (container) {
     projectHeadline.textContent = 'Projects';
 }
 
-//Displays current project title in dynamic display
-export function displayProjectTitle (name, container) {
+function createProjectTitle (name, container) {
+    
     let projectTitle = document.createElement('div');
 
     container.appendChild(projectTitle);
 
     projectTitle.setAttribute('id', 'dd-project-title');
 
+    projectTitle.textContent = name;
+}
+
+//Displays current project title in dynamic display
+export function displayProjectTitle (name) {
+    let projectTitle = document.querySelector('#dd-project-title');
+    
     projectTitle.textContent = name;
 }
 
@@ -260,7 +267,7 @@ export function displayNavbar () {
     displayAppLogo(navbar);
     createNavbarElements(navbar);
     displayProjects(navbar);
-    displayProjectTitle('Home', dynamicDisplay);
+    createProjectTitle('Home', dynamicDisplay);
     createTaskPopUp(dynamicDisplay);
     createAddTaskButton(dynamicDisplay);
     displayTasks(dynamicDisplay);
