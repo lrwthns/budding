@@ -24,7 +24,7 @@ function createNavbarElements (container) {
     }
 }
 
-function createProject (name, container) {
+export function createProject (name, container) {
     let project = document.createElement('div');
     
     container.appendChild(project);
@@ -79,22 +79,18 @@ function createProjectButton (container) {
 function displayProjects (container) {
     const projectContainer = document.createElement('div');
     const projectHeadline = document.createElement('div');
+    container.appendChild(projectHeadline);
+    createProjectButton(container);
     container.appendChild(projectContainer);
-    projectContainer.appendChild(projectHeadline);
 
     projectContainer.setAttribute('id', 'project-container')
     projectHeadline.setAttribute('id', 'project-headline');
 
     projectHeadline.textContent = 'Projects';
-
-    createProjectButton(container);
-    createProject('Work', projectContainer);
-    createProject('Gardening', projectContainer);
-
 }
 
 //Displays current project title in dynamic display
-function displayProjectTitle (name, container) {
+export function displayProjectTitle (name, container) {
     let projectTitle = document.createElement('div');
 
     container.appendChild(projectTitle);
@@ -106,7 +102,7 @@ function displayProjectTitle (name, container) {
 
 function createTaskPopUp (container) {
     const popUpContainer = document.createElement('div');
-    const popUp = document.createElement('div');
+    const popUp = document.createElement('form');
     const titleInput = document.createElement('input');
     const detailsInput = document.createElement('input');
     const dueDateInput = document.createElement('input');
@@ -133,13 +129,14 @@ function createTaskPopUp (container) {
     popUp.setAttribute('id', 'pop-up');
     titleInput.setAttribute('id', 'title-input');
     titleInput.setAttribute('placeholder', 'Title');
+    titleInput.setAttribute('required', '');
     detailsInput.setAttribute('id', 'details-input');
     detailsInput.setAttribute('placeholder', 'Details');
     dueDateInput.setAttribute('id', 'due-date-input');
     dueDateInput.setAttribute('placeholder', 'Due Date');
     dueDateInput.setAttribute('type', 'date');
-    priorityInput.setAttribute('id', 'priority-input');
-    priorityInput.setAttribute('placeholder', 'Priority');
+    dueDateInput.setAttribute('required', '');
+    priorityInput.setAttribute('id', 'priority-div');
     submitButton.setAttribute('id', 'pop-up-submit');
     priorityLabel.setAttribute('id', 'priority-label');
     low.setAttribute('id', 'priority-low');
@@ -152,9 +149,6 @@ function createTaskPopUp (container) {
     medium.textContent = 'MEDIUM';
     high.textContent = 'HIGH';
 
-    submitButton.addEventListener('click', () => {
-        popUpContainer.style.display = 'none';
-    })
     low.addEventListener('click', () => {
         low.setAttribute('id', 'priority-low-checked');
         medium.setAttribute('id', 'priority-medium');
@@ -170,6 +164,7 @@ function createTaskPopUp (container) {
         medium.setAttribute('id', 'priority-medium');
         high.setAttribute('id', 'priority-high-checked');
     })
+
 };
 
 function createAddTaskButton (container) {
@@ -182,12 +177,13 @@ function createAddTaskButton (container) {
     addTaskButton.innerHTML = '<span class="material-icons">add</span>' + 'Add Task';
 
     addTaskButton.addEventListener('click', () => {
-        createTaskPopUp(container);
+        const popUpContainer = document.querySelector('#pop-up-container');
+        popUpContainer.style.display = 'grid';
     })
     
 }
 
-function createTask (name, date, container) {
+export function createTask (name, date, priority, container) {
     let task = document.createElement('li');
     let taskLeftSide = document.createElement('div')
     let taskRightSide = document.createElement('div');
@@ -212,12 +208,24 @@ function createTask (name, date, container) {
     taskCheckbox.classList.add('material-icons');
     taskEdit.classList.add('material-icons');
     taskDelete.classList.add('material-icons');
-    taskPriority.setAttribute('id', 'task-priority');
     taskLeftSide.setAttribute('id', 'task-left-side');
     taskDesc.setAttribute('id', 'task-desc');
     taskRightSide.setAttribute('id', 'task-right-side');
     taskDueDate.setAttribute('id', 'task-due-date');
 
+    function setPriority (priority) {
+        if (priority == 'low') {
+            taskPriority.setAttribute('id', 'task-priority-low');
+        } else if (priority == 'medium') {
+            taskPriority.setAttribute('id', 'task-priority-medium');
+        } else if (priority == 'high') {
+            taskPriority.setAttribute('id', 'task-priority-high');
+        } else {
+            taskPriority.setAttribute('id', 'task-priority');
+        }
+    }
+
+    setPriority(priority);
     taskCheckbox.textContent = 'radio_button_unchecked';
     taskDesc.textContent = name;
     taskDueDate.textContent = date;
@@ -229,21 +237,21 @@ function createTask (name, date, container) {
             taskCheckbox.textContent = 'check_circle';
             taskDesc.setAttribute('id', 'task-desc-checked');
             taskDueDate.setAttribute('id', 'task-due-date-checked');
+            taskPriority.setAttribute('id', 'task-priority-checked');
         }
         else {
             taskCheckbox.textContent = 'radio_button_unchecked';
             taskDesc.setAttribute('id', 'task-desc');
             taskDueDate.setAttribute('id', 'task-due-date');
+            setPriority(priority);
         }
     })
-
 }
 
 function displayTasks (container) {
     const taskContainer = document.createElement('div');
+    taskContainer.setAttribute('id', 'task-container');
     container.appendChild(taskContainer);
-    createTask('Print files', '03-04-2021', taskContainer);
-    createTask('Call clients', '05-04-2021', taskContainer);
 }
 
 export function displayNavbar () {
@@ -252,8 +260,9 @@ export function displayNavbar () {
     displayAppLogo(navbar);
     createNavbarElements(navbar);
     displayProjects(navbar);
-    displayProjectTitle('Work', dynamicDisplay);
-    createAddTaskButton (dynamicDisplay);
+    displayProjectTitle('Home', dynamicDisplay);
+    createTaskPopUp(dynamicDisplay);
+    createAddTaskButton(dynamicDisplay);
     displayTasks(dynamicDisplay);
 }
 
