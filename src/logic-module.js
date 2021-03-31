@@ -1,3 +1,4 @@
+import { format, addDays, subDays, isBefore, isAfter, parseISO } from 'date-fns';
 import { createTask, createProject, displayProjectTitle } from './display-module';
 
 export function createNewTask () {
@@ -46,17 +47,40 @@ export function createNewTask () {
     function showTaskList (arr) {
         cleanContainer(taskContainer);
         let projectName = document.querySelector('#dd-project-title').textContent;
-        if (projectName == 'Home' || projectName == 'Today' || projectName == 'This Week') {
+        if (projectName == 'Home') {
+            //this displays all tasks
             for (let i = 0; i < arr.length; i ++) {
-                createTask(arr[i].title, arr[i].date, arr[i].priority, taskContainer);
+                let taskDueDate = format(new Date(arr[i].date),'MMMM do');
+                createTask(arr[i].title, taskDueDate, arr[i].priority, taskContainer);
+            }
+        } else if (projectName == 'Today') {
+            //this checks for tasks which are due today and put them in an array
+            let today = format(new Date(), 'y-MM-dd');
+            let todayArr = taskList.filter(task => task.date == today);
+            for (let i = 0; i < todayArr.length; i ++) {
+                let taskDueDate = format(new Date(todayArr[i].date),'MMMM do');
+                createTask(todayArr[i].title, taskDueDate, todayArr[i].priority, taskContainer);
+            }
+        } else if (projectName == 'This Week') {
+            //this checks for tasks which are due in the incoming week and put them in an array
+            let thisWeekArr = taskList.filter(task => { 
+                let today = new Date();
+                let beforeToday = subDays(today, 1);
+                let endOfWeek = addDays(today, 6);
+                return isAfter(parseISO(task.date), beforeToday) && isBefore(parseISO(task.date), endOfWeek);
+            })
+            for (let i = 0; i < thisWeekArr.length; i ++) {
+                let taskDueDate = format(new Date(thisWeekArr[i].date),'MMMM do');
+                createTask(thisWeekArr[i].title, taskDueDate, thisWeekArr[i].priority, taskContainer);
             }
         } else {
+            //this checks for tasks that belong in a project category
             let projectArr = taskList.filter(task => task.project == projectName);
             for (let i = 0; i < projectArr.length; i ++) {
-                createTask(projectArr[i].title, projectArr[i].date, projectArr[i].priority, taskContainer);
+                let taskDueDate = format(new Date(projectArr[i].date),'MMMM do');
+                createTask(projectArr[i].title, taskDueDate, projectArr[i].priority, taskContainer);
             }
         }
-        
     }
 
     function showProjectList (arr) {
@@ -78,7 +102,6 @@ export function createNewTask () {
         showTaskList(taskList);
         console.log(taskList);
         taskFormContainer.style.display = 'none';
-        
     })
 
     projectForm.addEventListener('submit', (event) => {
@@ -106,10 +129,11 @@ export function createNewTask () {
     })
     todayPage.addEventListener('click', () => {
         displayProjectTitle('Today');
+        showTaskList(taskList);
     })
     thisWeekPage.addEventListener('click', () => {
         displayProjectTitle('This Week');
+        showTaskList(taskList);
     })
 
-    
 }
