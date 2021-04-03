@@ -1,57 +1,41 @@
-function createElement (container, id, text = '') {
-    const element = document.createElement('div');
+function createNewElement (container, type, className, idName, text = '') {
+    const element = document.createElement(type);
     container.appendChild(element);
-    element.setAttribute('id', id);
+    if (className != '') {
+        element.classList.add(className)
+    }
+    else {
+        element.setAttribute('id', idName);
+    }
     element.textContent = text;
     return element;
 }
 
 const createNavbarElements = function (container) {
-    const appLogo = createElement(container, 'app-logo', 'budding');
-    const homeElement = createElement(container, 'nav-home', 'Home')
-    const todayElement = createElement(container, 'nav-today', 'Today');
-    const thisWeekElement = createElement(container, 'nav-this-week', 'This Week');
+    const appLogo = createNewElement(container, 'div', '', 'app-logo', 'budding');
+    const homeElement = createNewElement(container, 'div', '', 'nav-home', 'Home')
+    const todayElement = createNewElement(container, 'div', '', 'nav-today', 'Today');
+    const thisWeekElement = createNewElement(container, 'div', '', 'nav-this-week', 'This Week');
 };
 
 export function createProject (name, container) {
-    let project = document.createElement('div');
-    
-    container.appendChild(project);
-
-    project.classList.add('nav-project');
-
-    project.textContent = name;
+    let project = createNewElement(container, 'div', 'nav-project', '', name);
 }
 
 function createProjectButton (container) {
-    const newProject = document.createElement('div');
-    const newProjectButton = document.createElement('button');
-    const newProjectForm = document.createElement('form');
-    const formInput = document.createElement('input');
-    const formSubmit = document.createElement('button');
-    const formCancel = document.createElement('button');
+    const newProject = createNewElement(container, 'div', '', 'np-container');
+    const newProjectButton = createNewElement(newProject, 'button', '', 'np-button');
+    const newProjectForm = createNewElement(newProject, 'form', '', 'np-form-container');
+    const formInput = createNewElement(newProjectForm, 'input', '', 'np-form-input');
+    const formSubmit = createNewElement(newProjectForm, 'button', '', 'np-form-submit', 'Submit');
+    const formCancel = createNewElement(newProjectForm, 'button', '', 'np-form-cancel', 'Cancel');
 
-    container.appendChild(newProject);
-    newProject.appendChild(newProjectButton);
-    newProject.appendChild(newProjectForm);
-    newProjectForm.appendChild(formInput);
-    newProjectForm.appendChild(formSubmit);
-    newProjectForm.appendChild(formCancel);
-
-    newProject.setAttribute('id', 'np-container');
-    newProjectButton.setAttribute('id', 'np-button');
-    newProjectForm.setAttribute('id', 'np-form-container');
-    formInput.setAttribute('id', 'np-form-input');
     formInput.setAttribute('type', 'text');
     formInput.setAttribute('placeholder', 'project name');
     formInput.setAttribute('required', '');
-    formSubmit.setAttribute('id', 'np-form-submit');
     formSubmit.setAttribute('type', 'submit');
-    formCancel.setAttribute('id', 'np-form-cancel')
 
     newProjectButton.innerHTML = '<span class="material-icons">add</span>' + 'Add Project';
-    formSubmit.textContent = 'Submit';
-    formCancel.textContent = 'Cancel';
 
     newProjectButton.addEventListener('click', () => {
         newProjectForm.style.display = 'grid';
@@ -67,84 +51,40 @@ function createProjectButton (container) {
 
 //Displays projects in nav-bar
 function displayProjects (container) {
-    const projectContainer = document.createElement('div');
-    const projectHeadline = document.createElement('div');
-    container.appendChild(projectHeadline);
+    const projectHeadline = createNewElement(container, 'div', '', 'project-headline', 'Projects')
     createProjectButton(container);
-    container.appendChild(projectContainer);
-
-    projectContainer.setAttribute('id', 'project-container')
-    projectHeadline.setAttribute('id', 'project-headline');
-
-    projectHeadline.textContent = 'Projects';
+    const projectContainer = createNewElement(container, 'div', '', 'project-container') 
 }
 
-function createProjectTitle (name, container) {
-    
-    let projectTitle = document.createElement('div');
-
-    container.appendChild(projectTitle);
-
-    projectTitle.setAttribute('id', 'dd-project-title');
-
-    projectTitle.textContent = name;
+function createProjectTitle (container) {
+    let projectTitle = createNewElement(container, 'div', '', 'dd-project-title', 'Home');
 }
 
 //Displays current project title in dynamic display
 export function displayProjectTitle (name) {
     let projectTitle = document.querySelector('#dd-project-title');
-    
     projectTitle.textContent = name;
 }
 
 function createTaskPopUp (container) {
-    const popUpContainer = document.createElement('div');
-    const popUp = document.createElement('form');
-    const titleInput = document.createElement('input');
-    const detailsInput = document.createElement('input');
-    const dueDateInput = document.createElement('input');
-    const priorityInput = document.createElement('div');
-    const submitButton = document.createElement('button');
-    const priorityLabel = document.createElement('div');
-    const low = document.createElement('div');
-    const medium = document.createElement('div');
-    const high = document.createElement('div');
-    
-    container.appendChild(popUpContainer);
-    popUpContainer.appendChild(popUp);
-    popUp.appendChild(titleInput);
-    popUp.appendChild(detailsInput);
-    popUp.appendChild(dueDateInput);
-    popUp.appendChild(priorityInput);
-    popUp.appendChild(submitButton);
-    priorityInput.appendChild(priorityLabel);
-    priorityInput.appendChild(low);
-    priorityInput.appendChild(medium);
-    priorityInput.appendChild(high);
+    const popUpContainer = createNewElement(container, 'div', '', 'pop-up-container');
+    const popUp = createNewElement(popUpContainer, 'form', '', 'pop-up');
+    const titleInput = createNewElement(popUp, 'input', '', 'title-input');
+    const detailsInput = createNewElement(popUp, 'input', '', 'details-input');
+    const dueDateInput = createNewElement(popUp, 'input', '', 'due-date-input');
+    const priorityInput = createNewElement(popUp, 'div', '', 'priority-div');
+    const submitButton = createNewElement(popUp, 'button', '', 'pop-up-submit', 'Submit');
+    const priorityLabel = createNewElement(priorityInput, 'div', '', 'priority-label', 'Priority');
+    const low = createNewElement(priorityInput, 'div', '', 'priority-low', 'LOW');
+    const medium = createNewElement(priorityInput, 'div', '', 'priority-medium', 'MEDIUM');
+    const high = createNewElement(priorityInput, 'div', '', 'priority-high', 'HIGH');
 
-    popUpContainer.setAttribute('id', 'pop-up-container');
-    popUp.setAttribute('id', 'pop-up');
-    titleInput.setAttribute('id', 'title-input');
     titleInput.setAttribute('placeholder', 'Title');
     titleInput.setAttribute('required', '');
-    detailsInput.setAttribute('id', 'details-input');
     detailsInput.setAttribute('placeholder', 'Details');
-    dueDateInput.setAttribute('id', 'due-date-input');
     dueDateInput.setAttribute('placeholder', 'Due Date');
     dueDateInput.setAttribute('type', 'date');
     dueDateInput.setAttribute('required', '');
-    priorityInput.setAttribute('id', 'priority-div');
-    submitButton.setAttribute('id', 'pop-up-submit');
-    priorityLabel.setAttribute('id', 'priority-label');
-    low.setAttribute('id', 'priority-low');
-    medium.setAttribute('id', 'priority-medium');
-    high.setAttribute('id', 'priority-high');
-
-    submitButton.textContent = 'Submit';
-    priorityLabel.textContent = 'Priority';
-    low.textContent = 'LOW';
-    medium.textContent = 'MEDIUM';
-    high.textContent = 'HIGH';
 
     low.addEventListener('click', () => {
         low.setAttribute('id', 'priority-low-checked');
@@ -177,51 +117,26 @@ function createTaskPopUp (container) {
 };
 
 function createAddTaskButton (container) {
-    const addTaskButton = document.createElement('button');
-
-    container.appendChild(addTaskButton);
-
-    addTaskButton.setAttribute('id', 'add-task-button');
-
+    const addTaskButton = createNewElement(container, 'button', '', 'add-task-button');
     addTaskButton.innerHTML = '<span class="material-icons">add</span>' + 'Add Task';
 
     addTaskButton.addEventListener('click', () => {
         const popUpContainer = document.querySelector('#pop-up-container');
         popUpContainer.style.display = 'grid';
     })
-    
 }
 
 export function createTask (name, date, priority, container) {
-    let task = document.createElement('li');
-    let taskLeftSide = document.createElement('div')
-    let taskRightSide = document.createElement('div');
-    let taskCheckbox = document.createElement('span');
-    let taskDesc = document.createElement('div');
-    let taskPriority = document.createElement('div');
-    let taskDueDate = document.createElement('div');
-    let taskEdit = document.createElement('span');
-    let taskDelete = document.createElement('span');
-
-    container.appendChild(task);
-    task.appendChild(taskLeftSide);
-    taskLeftSide.appendChild(taskPriority);
-    taskLeftSide.appendChild(taskCheckbox);
-    taskLeftSide.appendChild(taskDesc);
-    task.appendChild(taskRightSide);
-    taskRightSide.appendChild(taskDueDate);
-    taskRightSide.appendChild(taskEdit);
-    taskRightSide.appendChild(taskDelete);
-
-    task.classList.add('user-tasks');
-    taskCheckbox.classList.add('material-icons');
-    taskEdit.classList.add('material-icons');
-    taskDelete.classList.add('material-icons');
-    taskLeftSide.setAttribute('id', 'task-left-side');
-    taskDesc.setAttribute('id', 'task-desc');
-    taskRightSide.setAttribute('id', 'task-right-side');
-    taskDueDate.setAttribute('id', 'task-due-date');
-
+    let task = createNewElement(container, 'li', 'user-tasks', '');
+    let taskLeftSide = createNewElement(task, 'div', '', 'task-left-side');
+    let taskRightSide = createNewElement(task, 'div', '', 'task-right-side');
+    let taskPriority = createNewElement(taskLeftSide, 'div', '', 'task-priority-checked');
+    let taskCheckbox = createNewElement(taskLeftSide, 'span', 'material-icons', '', 'radio_button_unchecked');
+    let taskDesc = createNewElement(taskLeftSide, 'div', '', 'task-desc', name);
+    let taskDueDate = createNewElement(taskRightSide, 'div', '', 'task-due-date', date);
+    let taskEdit = createNewElement(taskRightSide, 'span', 'material-icons', '', 'edit');
+    let taskDelete = createNewElement(taskRightSide, 'span', 'material-icons', '', 'delete');
+  
     function setPriority (priority) {
         if (priority == 'low') {
             taskPriority.setAttribute('id', 'task-priority-low');
@@ -235,11 +150,6 @@ export function createTask (name, date, priority, container) {
     }
 
     setPriority(priority);
-    taskCheckbox.textContent = 'radio_button_unchecked';
-    taskDesc.textContent = name;
-    taskDueDate.textContent = date;
-    taskEdit.textContent = 'edit';
-    taskDelete.textContent = 'delete';
 
     taskCheckbox.addEventListener('click', () => {
         if (taskCheckbox.textContent == 'radio_button_unchecked') {
@@ -258,9 +168,7 @@ export function createTask (name, date, priority, container) {
 }
 
 function displayTasks (container) {
-    const taskContainer = document.createElement('div');
-    taskContainer.setAttribute('id', 'task-container');
-    container.appendChild(taskContainer);
+    const taskContainer = createNewElement(container, 'div', '', 'task-container');
 }
 
 export function displayNavbar () {
@@ -268,7 +176,7 @@ export function displayNavbar () {
     const dynamicDisplay = document.querySelector('#dynamic-display');
     createNavbarElements(navbar);
     displayProjects(navbar);
-    createProjectTitle('Home', dynamicDisplay);
+    createProjectTitle(dynamicDisplay);
     createTaskPopUp(dynamicDisplay);
     createAddTaskButton(dynamicDisplay);
     displayTasks(dynamicDisplay);
