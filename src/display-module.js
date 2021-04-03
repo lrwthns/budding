@@ -1,11 +1,4 @@
-function displayAppLogo (container) {
-    const appLogo = document.createElement('div');
-    container.appendChild(appLogo);
-    appLogo.textContent = 'budding';
-    appLogo.setAttribute('id', 'app-logo');
-}
-
-function createNavElement (container, text, id) {
+function createElement (container, id, text = '') {
     const element = document.createElement('div');
     container.appendChild(element);
     element.setAttribute('id', id);
@@ -13,16 +6,12 @@ function createNavElement (container, text, id) {
     return element;
 }
 
-function createNavbarElements (container) {
-    const homeElement = createNavElement(container, 'Home', 'nav-home')
-    const todayElement = createNavElement(container, 'Today', 'nav-today');
-    const thisWeekElement = createNavElement(container, 'This Week', 'nav-this-week');
-    return {
-        homeElement,
-        todayElement,
-        thisWeekElement
-    }
-}
+const createNavbarElements = function (container) {
+    const appLogo = createElement(container, 'app-logo', 'budding');
+    const homeElement = createElement(container, 'nav-home', 'Home')
+    const todayElement = createElement(container, 'nav-today', 'Today');
+    const thisWeekElement = createElement(container, 'nav-this-week', 'This Week');
+};
 
 export function createProject (name, container) {
     let project = document.createElement('div');
@@ -70,6 +59,7 @@ function createProjectButton (container) {
     })
 
     formCancel.addEventListener('click', () => {
+        formInput.value = '';
         newProjectForm.style.display = 'none';
         newProjectButton.style.display = 'flex';
     })
@@ -172,6 +162,18 @@ function createTaskPopUp (container) {
         high.setAttribute('id', 'priority-high-checked');
     })
 
+    //this closes the pop-up form if user clicks outside of the form
+    popUpContainer.addEventListener('click', (event) => {
+        if (event.target != popUp && event.target.parentNode != popUp && event.target.parentNode != priorityInput) {
+            titleInput.value = '';
+            detailsInput.value = '';
+            dueDateInput.value = '';
+            low.setAttribute('id', 'priority-low');
+            medium.setAttribute('id', 'priority-medium');
+            high.setAttribute('id', 'priority-high');
+            popUpContainer.style.display = 'none';
+        }
+    })
 };
 
 function createAddTaskButton (container) {
@@ -264,7 +266,6 @@ function displayTasks (container) {
 export function displayNavbar () {
     const navbar = document.querySelector('#navigation-bar');
     const dynamicDisplay = document.querySelector('#dynamic-display');
-    displayAppLogo(navbar);
     createNavbarElements(navbar);
     displayProjects(navbar);
     createProjectTitle('Home', dynamicDisplay);
