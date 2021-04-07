@@ -3405,392 +3405,687 @@ function toDate(argument) {
 
 /***/ }),
 
-/***/ "./src/display-module.js":
-/*!*******************************!*\
-  !*** ./src/display-module.js ***!
-  \*******************************/
+/***/ "./src/app-logic.js":
+/*!**************************!*\
+  !*** ./src/app-logic.js ***!
+  \**************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "createProject": () => (/* binding */ createProject),
-/* harmony export */   "displayProjectTitle": () => (/* binding */ displayProjectTitle),
-/* harmony export */   "createTask": () => (/* binding */ createTask),
-/* harmony export */   "displayNavbar": () => (/* binding */ displayNavbar)
+/* harmony export */   "runLogic": () => (/* binding */ runLogic),
+/* harmony export */   "removeTaskFromList": () => (/* binding */ removeTaskFromList)
 /* harmony export */ });
-function createNewElement (container, type, className, idName, text = '') {
-    const element = document.createElement(type);
-    container.appendChild(element);
-    if (className != '') {
-        element.classList.add(className)
-    }
-    else {
-        element.setAttribute('id', idName);
-    }
-    element.textContent = text;
-    return element;
+/* harmony import */ var date_fns__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! date-fns */ "./node_modules/date-fns/esm/format/index.js");
+/* harmony import */ var date_fns__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! date-fns */ "./node_modules/date-fns/esm/subDays/index.js");
+/* harmony import */ var date_fns__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! date-fns */ "./node_modules/date-fns/esm/addDays/index.js");
+/* harmony import */ var date_fns__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! date-fns */ "./node_modules/date-fns/esm/isAfter/index.js");
+/* harmony import */ var date_fns__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! date-fns */ "./node_modules/date-fns/esm/parseISO/index.js");
+/* harmony import */ var date_fns__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! date-fns */ "./node_modules/date-fns/esm/isBefore/index.js");
+/* harmony import */ var _dom_manipulation__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./dom-manipulation */ "./src/dom-manipulation.js");
+/* harmony import */ var _create_project__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./create-project */ "./src/create-project.js");
+/* harmony import */ var _create_task__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./create-task */ "./src/create-task.js");
+/* eslint-disable no-console */
+/* eslint-disable no-plusplus */
+
+
+
+
+
+const taskList = [];
+const projectList = [];
+
+const taskFactory = (title, details, date, priority, project) => ({
+  title, details, date, priority, project,
+});
+
+// function populateStorage (arr) {
+//     localStorage.setItem('savedTaskList', JSON.stringify(arr));
+// }
+
+// function checkLocalStorage (arr, container) {
+//     if (localStorage.length > 0) {
+//         let savedTaskList = localStorage.getItem('savedTaskList');
+//         arr = JSON.parse(savedTaskList);
+//         return showTaskList(arr, container);
+//     }
+// }
+
+function checkPriority(container) {
+  const low = document.querySelector('#priority-low-checked');
+  const medium = document.querySelector('#priority-medium-checked');
+  const high = document.querySelector('#priority-high-checked');
+  if (container.contains(low)) {
+    return 'low';
+  } if (container.contains(medium)) {
+    return 'medium';
+  } if (container.contains(high)) {
+    return 'high';
+  } return '';
 }
 
-const createNavbarElements = function (container) {
-    const appLogo = createNewElement(container, 'div', '', 'app-logo', 'budding');
-    const homeElement = createNewElement(container, 'div', '', 'nav-home', 'Home')
-    const todayElement = createNewElement(container, 'div', '', 'nav-today', 'Today');
-    const thisWeekElement = createNewElement(container, 'div', '', 'nav-this-week', 'This Week');
+function clearTaskInput(priority) {
+  document.querySelector('#title-input').value = '';
+  document.querySelector('#details-input').value = '';
+  document.querySelector('#due-date-input').value = '';
+  if (priority === 'low') {
+    document
+      .querySelector('#priority-low-checked')
+      .setAttribute('id', 'priority-low');
+  } else if (priority === 'medium') {
+    document
+      .querySelector('#priority-medium-checked')
+      .setAttribute('id', 'priority-medium');
+  } else if (priority === 'high') {
+    document
+      .querySelector('#priority-high-checked')
+      .setAttribute('id', 'priority-high');
+  }
+}
+
+function cleanContainer(container) {
+  while (container.firstChild) {
+    container.removeChild(container.firstChild);
+  }
+}
+
+function showTaskList(arr, container) {
+  cleanContainer(container);
+  const projectName = document.querySelector('#header-element').textContent;
+  if (projectName === 'Home') {
+    // this displays all tasks
+    for (let i = 0; i < arr.length; i++) {
+      // let taskDueDate = format(new Date(arr[i].date),'MMMM do');
+      // createTask(arr[i].title, taskDueDate, arr[i].priority, container);
+      (0,_create_task__WEBPACK_IMPORTED_MODULE_2__.default)(arr[i].title, arr[i].date, arr[i].priority, container);
+    }
+  } else if (projectName === 'Today') {
+    // this checks for tasks which are due today and put them in an array
+    const today = (0,date_fns__WEBPACK_IMPORTED_MODULE_3__.default)(new Date(), 'y-MM-dd');
+    const todayArr = taskList.filter((task) => task.date === today);
+    for (let i = 0; i < todayArr.length; i++) {
+      const taskDueDate = (0,date_fns__WEBPACK_IMPORTED_MODULE_3__.default)(new Date(todayArr[i].date), 'MMMM do');
+      (0,_create_task__WEBPACK_IMPORTED_MODULE_2__.default)(
+        todayArr[i].title,
+        taskDueDate,
+        todayArr[i].priority,
+        container,
+      );
+    }
+  } else if (projectName === 'This Week') {
+    // this checks for tasks which are due in the incoming week and put them in an array
+    const thisWeekArr = taskList.filter((task) => {
+      const today = new Date();
+      const beforeToday = (0,date_fns__WEBPACK_IMPORTED_MODULE_4__.default)(today, 1);
+      const endOfWeek = (0,date_fns__WEBPACK_IMPORTED_MODULE_5__.default)(today, 6);
+      return (
+        (0,date_fns__WEBPACK_IMPORTED_MODULE_6__.default)((0,date_fns__WEBPACK_IMPORTED_MODULE_7__.default)(task.date), beforeToday)
+        && (0,date_fns__WEBPACK_IMPORTED_MODULE_8__.default)((0,date_fns__WEBPACK_IMPORTED_MODULE_7__.default)(task.date), endOfWeek)
+      );
+    });
+    for (let i = 0; i < thisWeekArr.length; i++) {
+      const taskDueDate = (0,date_fns__WEBPACK_IMPORTED_MODULE_3__.default)(new Date(thisWeekArr[i].date), 'MMMM do');
+      (0,_create_task__WEBPACK_IMPORTED_MODULE_2__.default)(
+        thisWeekArr[i].title,
+        taskDueDate,
+        thisWeekArr[i].priority,
+        container,
+      );
+    }
+  } else {
+    // this checks for tasks that belong in a project category
+    const projectArr = taskList.filter((task) => task.project === projectName);
+    for (let i = 0; i < projectArr.length; i++) {
+      const taskDueDate = (0,date_fns__WEBPACK_IMPORTED_MODULE_3__.default)(new Date(projectArr[i].date), 'MMMM do');
+      (0,_create_task__WEBPACK_IMPORTED_MODULE_2__.default)(
+        projectArr[i].title,
+        taskDueDate,
+        projectArr[i].priority,
+        container,
+      );
+    }
+  }
+}
+
+function showProjectList(arr, container) {
+  cleanContainer(container);
+  for (let i = 0; i < arr.length; i++) {
+    (0,_create_project__WEBPACK_IMPORTED_MODULE_1__.default)(arr[i], container);
+  }
+}
+
+function removeTaskFromList(taskTitle, taskDate, container) {
+  // eslint-disable-next-line consistent-return
+  function findTaskIndex() {
+    for (let i = 0; i < taskList.length; i++) {
+      if (taskList[i].title === taskTitle && taskList[i].date === taskDate) {
+        return i;
+      }
+    }
+  }
+  taskList.splice(findTaskIndex(), 1);
+  console.log(taskList);
+  showTaskList(taskList, container);
+}
+
+// eslint-disable-next-line func-names
+const runLogic = () => {
+  const taskFormContainer = document.querySelector('#pop-up-container');
+  const taskForm = document.querySelector('#pop-up');
+  const projectForm = document.querySelector('#np-form-container');
+  const homePage = document.querySelector('#nav-home');
+  const todayPage = document.querySelector('#nav-today');
+  const thisWeekPage = document.querySelector('#nav-this-week');
+  const taskContainer = document.querySelector('#task-container');
+  const projectContainer = document.querySelector('#project-container');
+  const newProjectButton = document.querySelector('#np-button');
+  const priorityDiv = document.querySelector('#priority-div');
+  taskForm.addEventListener('submit', (event) => {
+    event.preventDefault();
+    const taskTitle = document.querySelector('#title-input').value;
+    const taskDetails = document.querySelector('#details-input').value;
+    const taskDueDate = document.querySelector('#due-date-input').value;
+    const taskPriority = checkPriority(priorityDiv);
+    const taskProject = document.querySelector('#header-element').textContent;
+    const newTask = taskFactory(
+      taskTitle,
+      taskDetails,
+      taskDueDate,
+      taskPriority,
+      taskProject,
+    );
+    taskList.push(newTask);
+    // populateStorage(taskList);
+    showTaskList(taskList, taskContainer);
+    console.log(taskList);
+    // clearTaskInput(taskPriority);
+    taskFormContainer.style.display = 'none';
+  });
+
+  projectForm.addEventListener('submit', (event) => {
+    event.preventDefault();
+    cleanContainer(taskContainer);
+    const projectInput = document.querySelector('#np-form-input');
+    projectList.push(projectInput.value);
+    showProjectList(projectList, projectContainer);
+    console.log(projectList);
+    projectForm.style.display = 'none';
+    newProjectButton.style.display = 'flex';
+    (0,_dom_manipulation__WEBPACK_IMPORTED_MODULE_0__.changeHeader)(projectInput.value);
+    projectInput.value = '';
+    const projects = document.querySelectorAll('.nav-project');
+    // const projectDeleteButton = document.querySelector('#delete-project-button');
+    projects.forEach((project, index) => {
+      project.addEventListener('click', (e) => {
+        // if (e.target.parentNode === project) {
+        //   projectList.splice(index, 1);
+        //   console.log(projectList);
+        //   showProjectList(projectList);
+        // } else {
+          const str = project.textContent;
+          const newStr = str.slice(0, str.length - 6);
+          (0,_dom_manipulation__WEBPACK_IMPORTED_MODULE_0__.changeHeader)(newStr);
+          showTaskList(taskList, taskContainer);
+        // }
+      });
+      // project.firstChild.addEventListener('click', () => {
+      //   projectList.splice(index, 1);
+      //   console.log(projectList);
+      //   showProjectList(projectList);
+      // });
+    });
+    // projectDeleteButton.addEventListener('click', () => {
+    //   function findProjectIndex() {
+    //     const str = projectDeleteButton.parentElement.textContent;
+    //     const newStr = str.slice(0, str.length - 6);
+    //     for (let i = 0; i < projectList.length; i++) {
+    //       if (newStr === projectList[i]) {
+    //         return i;
+    //       }
+    //     }
+    //     return undefined;
+    //   }
+    //   projectList.splice(findProjectIndex(), 1);
+    //   console.log(projectList);
+    //   showProjectList(projectList);
+    // });
+  });
+
+  homePage.addEventListener('click', () => {
+    (0,_dom_manipulation__WEBPACK_IMPORTED_MODULE_0__.changeHeader)('Home');
+    showTaskList(taskList, taskContainer);
+  });
+  todayPage.addEventListener('click', () => {
+    (0,_dom_manipulation__WEBPACK_IMPORTED_MODULE_0__.changeHeader)('Today');
+    showTaskList(taskList, taskContainer);
+  });
+  thisWeekPage.addEventListener('click', () => {
+    (0,_dom_manipulation__WEBPACK_IMPORTED_MODULE_0__.changeHeader)('This Week');
+    showTaskList(taskList, taskContainer);
+  });
 };
 
-function createProject (name, container) {
-    let project = createNewElement(container, 'div', 'nav-project', '', name);
-}
-
-function createProjectButton (container) {
-    const newProject = createNewElement(container, 'div', '', 'np-container');
-    const newProjectButton = createNewElement(newProject, 'button', '', 'np-button');
-    const newProjectForm = createNewElement(newProject, 'form', '', 'np-form-container');
-    const formInput = createNewElement(newProjectForm, 'input', '', 'np-form-input');
-    const formSubmit = createNewElement(newProjectForm, 'button', '', 'np-form-submit', 'Submit');
-    const formCancel = createNewElement(newProjectForm, 'button', '', 'np-form-cancel', 'Cancel');
-
-    formInput.setAttribute('type', 'text');
-    formInput.setAttribute('placeholder', 'project name');
-    formInput.setAttribute('required', '');
-    formSubmit.setAttribute('type', 'submit');
-
-    newProjectButton.innerHTML = '<span class="material-icons">add</span>' + 'Add Project';
-
-    newProjectButton.addEventListener('click', () => {
-        newProjectForm.style.display = 'grid';
-        newProjectButton.style.display = 'none';
-    })
-
-    formCancel.addEventListener('click', () => {
-        formInput.value = '';
-        newProjectForm.style.display = 'none';
-        newProjectButton.style.display = 'flex';
-    })
-}
-
-//Displays projects in nav-bar
-function displayProjects (container) {
-    const projectHeadline = createNewElement(container, 'div', '', 'project-headline', 'Projects')
-    createProjectButton(container);
-    const projectContainer = createNewElement(container, 'div', '', 'project-container') 
-}
-
-function createProjectTitle (container) {
-    let projectTitle = createNewElement(container, 'div', '', 'dd-project-title', 'Home');
-}
-
-//Displays current project title in dynamic display
-function displayProjectTitle (name) {
-    let projectTitle = document.querySelector('#dd-project-title');
-    projectTitle.textContent = name;
-}
-
-function createTaskPopUp (container) {
-    const popUpContainer = createNewElement(container, 'div', '', 'pop-up-container');
-    const popUp = createNewElement(popUpContainer, 'form', '', 'pop-up');
-    const titleInput = createNewElement(popUp, 'input', '', 'title-input');
-    const detailsInput = createNewElement(popUp, 'input', '', 'details-input');
-    const dueDateInput = createNewElement(popUp, 'input', '', 'due-date-input');
-    const priorityInput = createNewElement(popUp, 'div', '', 'priority-div');
-    const submitButton = createNewElement(popUp, 'button', '', 'pop-up-submit', 'Submit');
-    const priorityLabel = createNewElement(priorityInput, 'div', '', 'priority-label', 'Priority');
-    const low = createNewElement(priorityInput, 'div', '', 'priority-low', 'LOW');
-    const medium = createNewElement(priorityInput, 'div', '', 'priority-medium', 'MEDIUM');
-    const high = createNewElement(priorityInput, 'div', '', 'priority-high', 'HIGH');
-
-    titleInput.setAttribute('placeholder', 'Title');
-    titleInput.setAttribute('required', '');
-    detailsInput.setAttribute('placeholder', 'Details');
-    dueDateInput.setAttribute('placeholder', 'Due Date');
-    dueDateInput.setAttribute('type', 'date');
-    dueDateInput.setAttribute('required', '');
-
-    low.addEventListener('click', () => {
-        low.setAttribute('id', 'priority-low-checked');
-        medium.setAttribute('id', 'priority-medium');
-        high.setAttribute('id', 'priority-high');
-    })
-    medium.addEventListener('click', () => {
-        low.setAttribute('id', 'priority-low');
-        medium.setAttribute('id', 'priority-medium-checked');
-        high.setAttribute('id', 'priority-high');
-    })
-    high.addEventListener('click', () => {
-        low.setAttribute('id', 'priority-low');
-        medium.setAttribute('id', 'priority-medium');
-        high.setAttribute('id', 'priority-high-checked');
-    })
-
-    //this closes the pop-up form if user clicks outside of the form
-    popUpContainer.addEventListener('click', (event) => {
-        if (event.target != popUp && event.target.parentNode != popUp && event.target.parentNode != priorityInput) {
-            titleInput.value = '';
-            detailsInput.value = '';
-            dueDateInput.value = '';
-            low.setAttribute('id', 'priority-low');
-            medium.setAttribute('id', 'priority-medium');
-            high.setAttribute('id', 'priority-high');
-            popUpContainer.style.display = 'none';
-        }
-    })
-};
-
-function createAddTaskButton (container) {
-    const addTaskButton = createNewElement(container, 'button', '', 'add-task-button');
-    addTaskButton.innerHTML = '<span class="material-icons">add</span>' + 'Add Task';
-
-    addTaskButton.addEventListener('click', () => {
-        const popUpContainer = document.querySelector('#pop-up-container');
-        popUpContainer.style.display = 'grid';
-    })
-}
-
-function createTask (name, date, priority, container) {
-    let task = createNewElement(container, 'li', 'user-tasks', '');
-    let taskLeftSide = createNewElement(task, 'div', '', 'task-left-side');
-    let taskRightSide = createNewElement(task, 'div', '', 'task-right-side');
-    let taskPriority = createNewElement(taskLeftSide, 'div', '', 'task-priority-checked');
-    let taskCheckbox = createNewElement(taskLeftSide, 'span', 'material-icons', '', 'radio_button_unchecked');
-    let taskDesc = createNewElement(taskLeftSide, 'div', '', 'task-desc', name);
-    let taskDueDate = createNewElement(taskRightSide, 'div', '', 'task-due-date', date);
-    let taskEdit = createNewElement(taskRightSide, 'span', 'material-icons', '', 'edit');
-    let taskDelete = createNewElement(taskRightSide, 'span', 'material-icons', '', 'delete');
-  
-    function setPriority (priority) {
-        if (priority == 'low') {
-            taskPriority.setAttribute('id', 'task-priority-low');
-        } else if (priority == 'medium') {
-            taskPriority.setAttribute('id', 'task-priority-medium');
-        } else if (priority == 'high') {
-            taskPriority.setAttribute('id', 'task-priority-high');
-        } else {
-            taskPriority.setAttribute('id', 'task-priority');
-        }
-    }
-
-    setPriority(priority);
-
-    taskCheckbox.addEventListener('click', () => {
-        if (taskCheckbox.textContent == 'radio_button_unchecked') {
-            taskCheckbox.textContent = 'check_circle';
-            taskDesc.setAttribute('id', 'task-desc-checked');
-            taskDueDate.setAttribute('id', 'task-due-date-checked');
-            taskPriority.setAttribute('id', 'task-priority-checked');
-        }
-        else {
-            taskCheckbox.textContent = 'radio_button_unchecked';
-            taskDesc.setAttribute('id', 'task-desc');
-            taskDueDate.setAttribute('id', 'task-due-date');
-            setPriority(priority);
-        }
-    })
-}
-
-function displayTasks (container) {
-    const taskContainer = createNewElement(container, 'div', '', 'task-container');
-}
-
-function displayNavbar () {
-    const navbar = document.querySelector('#navigation-bar');
-    const dynamicDisplay = document.querySelector('#dynamic-display');
-    createNavbarElements(navbar);
-    displayProjects(navbar);
-    createProjectTitle(dynamicDisplay);
-    createTaskPopUp(dynamicDisplay);
-    createAddTaskButton(dynamicDisplay);
-    displayTasks(dynamicDisplay);
-}
 
 
 
 /***/ }),
 
-/***/ "./src/logic-module.js":
-/*!*****************************!*\
-  !*** ./src/logic-module.js ***!
-  \*****************************/
+/***/ "./src/create-project.js":
+/*!*******************************!*\
+  !*** ./src/create-project.js ***!
+  \*******************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "createNewTask": () => (/* binding */ createNewTask)
+/* harmony export */   "default": () => (/* binding */ createProject)
 /* harmony export */ });
-/* harmony import */ var date_fns__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! date-fns */ "./node_modules/date-fns/esm/format/index.js");
-/* harmony import */ var date_fns__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! date-fns */ "./node_modules/date-fns/esm/subDays/index.js");
-/* harmony import */ var date_fns__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! date-fns */ "./node_modules/date-fns/esm/addDays/index.js");
-/* harmony import */ var date_fns__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! date-fns */ "./node_modules/date-fns/esm/isAfter/index.js");
-/* harmony import */ var date_fns__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! date-fns */ "./node_modules/date-fns/esm/parseISO/index.js");
-/* harmony import */ var date_fns__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! date-fns */ "./node_modules/date-fns/esm/isBefore/index.js");
-/* harmony import */ var _display_module__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./display-module */ "./src/display-module.js");
+/* harmony import */ var _dom_manipulation_helper__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./dom-manipulation-helper */ "./src/dom-manipulation-helper.js");
 
 
-
-function createNewTask () {
-    const navbar = document.querySelector('#navigation-bar');
-    const dynamicDisplay = document.querySelector('#dynamic-display');
-    const taskFormContainer = document.querySelector('#pop-up-container');
-    const taskForm = document.querySelector('#pop-up');
-    const taskContainer = document.querySelector('#task-container');
-    const projectForm = document.querySelector('#np-form-container');
-    const projectContainer = document.querySelector('#project-container');
-    const newProjectButton = document.querySelector('#np-button');
-    const homePage = document.querySelector('#nav-home');
-    const todayPage = document.querySelector('#nav-today');
-    const thisWeekPage = document.querySelector('#nav-this-week');
-    const priorityDiv = document.querySelector('#priority-div');
-
-    let taskList = [];
-
-    let projectList = [];
-
-    const taskFactory = (title, details, date, priority, project = 'Home') => {
-        return { title, details, date, priority, project};
-    }
-
-    function populateStorage (arr) {
-        localStorage.setItem('savedTaskList', JSON.stringify(arr));
-    }
-
-    function checkLocalStorage (arr) {
-        if (localStorage.length > 0) {
-            let savedTaskList = localStorage.getItem('savedTaskList');
-            arr = JSON.parse(savedTaskList);
-            return showTaskList(arr);
-        }
-    }
-
-    function checkPriority (container) {
-        const low = document.querySelector('#priority-low-checked');
-        const medium = document.querySelector('#priority-medium-checked');
-        const high = document.querySelector('#priority-high-checked');
-        if (container.contains(low)) {
-            return 'low';
-        } else if (container.contains(medium)) {
-            return 'medium';
-        } else if (container.contains(high)) {
-            return 'high';
-        } else {
-            return '';
-        }
-    }
-
-    function clearTaskInput (priority) {
-        document.querySelector('#title-input').value = '';
-        document.querySelector('#details-input').value = '';
-        document.querySelector('#due-date-input').value = '';
-        if (priority == 'low') {
-            document.querySelector('#priority-low-checked').setAttribute('id', 'priority-low');
-        } else if (priority == 'medium') {
-            document.querySelector('#priority-medium-checked').setAttribute('id', 'priority-medium');
-        } else if (priority == 'high') {
-            document.querySelector('#priority-high-checked').setAttribute('id', 'priority-high');
-        }
-    }
-
-    function cleanContainer (container) {
-        while (container.firstChild) {
-            container.removeChild(container.firstChild);
-        }
-    }
-
-    function showTaskList (arr) {
-        cleanContainer(taskContainer);
-        let projectName = document.querySelector('#dd-project-title').textContent;
-        if (projectName == 'Home') {
-            //this displays all tasks
-            for (let i = 0; i < arr.length; i ++) {
-                let taskDueDate = (0,date_fns__WEBPACK_IMPORTED_MODULE_1__.default)(new Date(arr[i].date),'MMMM do');
-                (0,_display_module__WEBPACK_IMPORTED_MODULE_0__.createTask)(arr[i].title, taskDueDate, arr[i].priority, taskContainer);
-            }
-        } else if (projectName == 'Today') {
-            //this checks for tasks which are due today and put them in an array
-            let today = (0,date_fns__WEBPACK_IMPORTED_MODULE_1__.default)(new Date(), 'y-MM-dd');
-            let todayArr = taskList.filter(task => task.date == today);
-            for (let i = 0; i < todayArr.length; i ++) {
-                let taskDueDate = (0,date_fns__WEBPACK_IMPORTED_MODULE_1__.default)(new Date(todayArr[i].date),'MMMM do');
-                (0,_display_module__WEBPACK_IMPORTED_MODULE_0__.createTask)(todayArr[i].title, taskDueDate, todayArr[i].priority, taskContainer);
-            }
-        } else if (projectName == 'This Week') {
-            //this checks for tasks which are due in the incoming week and put them in an array
-            let thisWeekArr = taskList.filter(task => { 
-                let today = new Date();
-                let beforeToday = (0,date_fns__WEBPACK_IMPORTED_MODULE_2__.default)(today, 1);
-                let endOfWeek = (0,date_fns__WEBPACK_IMPORTED_MODULE_3__.default)(today, 6);
-                return (0,date_fns__WEBPACK_IMPORTED_MODULE_4__.default)((0,date_fns__WEBPACK_IMPORTED_MODULE_5__.default)(task.date), beforeToday) && (0,date_fns__WEBPACK_IMPORTED_MODULE_6__.default)((0,date_fns__WEBPACK_IMPORTED_MODULE_5__.default)(task.date), endOfWeek);
-            })
-            for (let i = 0; i < thisWeekArr.length; i ++) {
-                let taskDueDate = (0,date_fns__WEBPACK_IMPORTED_MODULE_1__.default)(new Date(thisWeekArr[i].date),'MMMM do');
-                (0,_display_module__WEBPACK_IMPORTED_MODULE_0__.createTask)(thisWeekArr[i].title, taskDueDate, thisWeekArr[i].priority, taskContainer);
-            }
-        } else {
-            //this checks for tasks that belong in a project category
-            let projectArr = taskList.filter(task => task.project == projectName);
-            for (let i = 0; i < projectArr.length; i ++) {
-                let taskDueDate = (0,date_fns__WEBPACK_IMPORTED_MODULE_1__.default)(new Date(projectArr[i].date),'MMMM do');
-                (0,_display_module__WEBPACK_IMPORTED_MODULE_0__.createTask)(projectArr[i].title, taskDueDate, projectArr[i].priority, taskContainer);
-            }
-        }
-    }
-
-    function showProjectList (arr) {
-        cleanContainer(projectContainer);
-        for (let i = 0; i < arr.length; i ++) {
-            (0,_display_module__WEBPACK_IMPORTED_MODULE_0__.createProject)(arr[i], projectContainer);
-        }
-    }
-
-    taskForm.addEventListener('submit', (event) => {
-        event.preventDefault();
-        let taskTitle = document.querySelector('#title-input').value;
-        let taskDetails = document.querySelector('#details-input').value;
-        let taskDueDate = document.querySelector('#due-date-input').value;
-        let taskPriority = checkPriority(priorityDiv);
-        let taskProject = document.querySelector('#dd-project-title').textContent;
-        let isTaskChecked = false;
-        let newTask = taskFactory(taskTitle, taskDetails, taskDueDate, taskPriority, taskProject);
-        taskList.push(newTask);
-        populateStorage(taskList);
-        showTaskList(taskList);
-        console.log(taskList);
-        clearTaskInput(taskPriority)
-        taskFormContainer.style.display = 'none';
-    })
-
-    projectForm.addEventListener('submit', (event) => {
-        event.preventDefault();
-        cleanContainer(taskContainer);
-        let projectInput = document.querySelector('#np-form-input');
-        projectList.push(projectInput.value);
-        showProjectList(projectList);
-        projectForm.style.display = 'none';
-        newProjectButton.style.display = 'flex';
-        (0,_display_module__WEBPACK_IMPORTED_MODULE_0__.displayProjectTitle)(projectInput.value);
-        projectInput.value = '';
-        const projects = document.querySelectorAll('.nav-project');
-        projects.forEach((project) => {
-            project.addEventListener('click', () => {
-                (0,_display_module__WEBPACK_IMPORTED_MODULE_0__.displayProjectTitle)(project.textContent);
-                
-                showTaskList(taskList);
-            })
-        })
-    })
-
-    homePage.addEventListener('click', () => {
-        ;(0,_display_module__WEBPACK_IMPORTED_MODULE_0__.displayProjectTitle)('Home');
-        showTaskList(taskList);
-    })
-    todayPage.addEventListener('click', () => {
-        ;(0,_display_module__WEBPACK_IMPORTED_MODULE_0__.displayProjectTitle)('Today');
-        showTaskList(taskList);
-    })
-    thisWeekPage.addEventListener('click', () => {
-        ;(0,_display_module__WEBPACK_IMPORTED_MODULE_0__.displayProjectTitle)('This Week');
-        showTaskList(taskList);
-    })
-
+function createProject(name, container) {
+  const project = (0,_dom_manipulation_helper__WEBPACK_IMPORTED_MODULE_0__.default)(container, 'div', 'nav-project', '', name);
+  const projectDelete = (0,_dom_manipulation_helper__WEBPACK_IMPORTED_MODULE_0__.default)(
+    project,
+    'span',
+    'material-icons',
+    '',
+    'delete',
+  );
+  projectDelete.setAttribute('id', 'delete-project-button');
+  return {
+    project,
+    projectDelete,
+  };
 }
+
+
+/***/ }),
+
+/***/ "./src/create-task.js":
+/*!****************************!*\
+  !*** ./src/create-task.js ***!
+  \****************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ createTask)
+/* harmony export */ });
+/* harmony import */ var _dom_manipulation_helper__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./dom-manipulation-helper */ "./src/dom-manipulation-helper.js");
+
+// import appLogic from './logic-module';
+
+function createTask(name, date, priority, container) {
+  // const logic = appLogic();
+  const task = (0,_dom_manipulation_helper__WEBPACK_IMPORTED_MODULE_0__.default)(container, 'li', 'user-tasks', '');
+  const taskLeftSide = (0,_dom_manipulation_helper__WEBPACK_IMPORTED_MODULE_0__.default)(task, 'div', '', 'task-left-side');
+  const taskRightSide = (0,_dom_manipulation_helper__WEBPACK_IMPORTED_MODULE_0__.default)(task, 'div', '', 'task-right-side');
+  const taskPriority = (0,_dom_manipulation_helper__WEBPACK_IMPORTED_MODULE_0__.default)(
+    taskLeftSide,
+    'div',
+    '',
+    'task-priority-checked',
+  );
+  const taskCheckbox = (0,_dom_manipulation_helper__WEBPACK_IMPORTED_MODULE_0__.default)(
+    taskLeftSide,
+    'span',
+    'material-icons',
+    '',
+    'radio_button_unchecked',
+  );
+  const taskDesc = (0,_dom_manipulation_helper__WEBPACK_IMPORTED_MODULE_0__.default)(taskLeftSide, 'div', '', 'task-desc', name);
+  const taskDueDate = (0,_dom_manipulation_helper__WEBPACK_IMPORTED_MODULE_0__.default)(
+    taskRightSide,
+    'div',
+    '',
+    'task-due-date',
+    date,
+  );
+  const taskEdit = (0,_dom_manipulation_helper__WEBPACK_IMPORTED_MODULE_0__.default)(
+    taskRightSide,
+    'span',
+    'material-icons',
+    '',
+    'edit',
+  );
+  const taskDelete = (0,_dom_manipulation_helper__WEBPACK_IMPORTED_MODULE_0__.default)(
+    taskRightSide,
+    'span',
+    'material-icons',
+    '',
+    'delete',
+  );
+
+  taskEdit.setAttribute('id', 'task-edit-span');
+  taskDelete.setAttribute('id', 'task-edit-span');
+
+  function setPriority(element) {
+    if (element === 'low') {
+      taskPriority.setAttribute('id', 'task-priority-low');
+    } else if (element === 'medium') {
+      taskPriority.setAttribute('id', 'task-priority-medium');
+    } else if (element === 'high') {
+      taskPriority.setAttribute('id', 'task-priority-high');
+    } else {
+      taskPriority.setAttribute('id', 'task-priority');
+    }
+  }
+
+  setPriority(priority);
+
+  taskCheckbox.addEventListener('click', () => {
+    if (taskCheckbox.textContent === 'radio_button_unchecked') {
+      taskCheckbox.textContent = 'check_circle';
+      taskDesc.setAttribute('id', 'task-desc-checked');
+      taskDueDate.setAttribute('id', 'task-due-date-checked');
+      taskPriority.setAttribute('id', 'task-priority-checked');
+    } else {
+      taskCheckbox.textContent = 'radio_button_unchecked';
+      taskDesc.setAttribute('id', 'task-desc');
+      taskDueDate.setAttribute('id', 'task-due-date');
+      setPriority(priority);
+    }
+  });
+
+  // taskDelete.addEventListener('click', () => {
+  //   logic.removeTaskFromList(taskDesc.textContent, taskDueDate.textContent);
+  // });
+}
+
+
+/***/ }),
+
+/***/ "./src/dom-manipulation-helper.js":
+/*!****************************************!*\
+  !*** ./src/dom-manipulation-helper.js ***!
+  \****************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ createNewElement)
+/* harmony export */ });
+function createNewElement(
+  container,
+  type,
+  className,
+  idName,
+  text = '',
+) {
+  const element = document.createElement(type);
+  container.appendChild(element);
+  if (className !== '') {
+    element.classList.add(className);
+  } else {
+    element.setAttribute('id', idName);
+  }
+  element.textContent = text;
+  return element;
+}
+
+
+/***/ }),
+
+/***/ "./src/dom-manipulation.js":
+/*!*********************************!*\
+  !*** ./src/dom-manipulation.js ***!
+  \*********************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "displayInitialElements": () => (/* binding */ displayInitialElements),
+/* harmony export */   "changeHeader": () => (/* binding */ changeHeader)
+/* harmony export */ });
+/* harmony import */ var _dom_manipulation_helper__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./dom-manipulation-helper */ "./src/dom-manipulation-helper.js");
+
+
+const createNavbarElements = (container) => {
+  const appLogo = (0,_dom_manipulation_helper__WEBPACK_IMPORTED_MODULE_0__.default)(container, 'div', '', 'app-logo', 'budding');
+  const homeElement = (0,_dom_manipulation_helper__WEBPACK_IMPORTED_MODULE_0__.default)(
+    container,
+    'div',
+    '',
+    'nav-home',
+    'Home',
+  );
+  const todayElement = (0,_dom_manipulation_helper__WEBPACK_IMPORTED_MODULE_0__.default)(
+    container,
+    'div',
+    '',
+    'nav-today',
+    'Today',
+  );
+  const thisWeekElement = (0,_dom_manipulation_helper__WEBPACK_IMPORTED_MODULE_0__.default)(
+    container,
+    'div',
+    '',
+    'nav-this-week',
+    'This Week',
+  );
+  return {
+    appLogo,
+    homeElement,
+    todayElement,
+    thisWeekElement,
+  };
+};
+
+function createProjectButton(container) {
+  const newProject = (0,_dom_manipulation_helper__WEBPACK_IMPORTED_MODULE_0__.default)(container, 'div', '', 'np-container');
+  const newProjectButton = (0,_dom_manipulation_helper__WEBPACK_IMPORTED_MODULE_0__.default)(
+    newProject,
+    'button',
+    '',
+    'np-button',
+  );
+  const newProjectForm = (0,_dom_manipulation_helper__WEBPACK_IMPORTED_MODULE_0__.default)(
+    newProject,
+    'form',
+    '',
+    'np-form-container',
+  );
+  const formInput = (0,_dom_manipulation_helper__WEBPACK_IMPORTED_MODULE_0__.default)(
+    newProjectForm,
+    'input',
+    '',
+    'np-form-input',
+  );
+  const formSubmit = (0,_dom_manipulation_helper__WEBPACK_IMPORTED_MODULE_0__.default)(
+    newProjectForm,
+    'button',
+    '',
+    'np-form-submit',
+    'Submit',
+  );
+  const formCancel = (0,_dom_manipulation_helper__WEBPACK_IMPORTED_MODULE_0__.default)(
+    newProjectForm,
+    'button',
+    '',
+    'np-form-cancel',
+    'Cancel',
+  );
+
+  formInput.setAttribute('type', 'text');
+  formInput.setAttribute('placeholder', 'project name');
+  formInput.setAttribute('required', '');
+  formSubmit.setAttribute('type', 'submit');
+
+  newProjectButton.innerHTML = '<span class="material-icons">add</span> Add Project';
+
+  newProjectButton.addEventListener('click', () => {
+    newProjectForm.style.display = 'grid';
+    newProjectButton.style.display = 'none';
+  });
+
+  formCancel.addEventListener('click', () => {
+    formInput.value = '';
+    newProjectForm.style.display = 'none';
+    newProjectButton.style.display = 'flex';
+  });
+}
+
+// Displays projects in nav-bar
+function createNavbarProjectElements(container) {
+  const projectHeadline = (0,_dom_manipulation_helper__WEBPACK_IMPORTED_MODULE_0__.default)(
+    container,
+    'div',
+    '',
+    'project-headline',
+    'Projects',
+  );
+  createProjectButton(container);
+  const projectContainer = (0,_dom_manipulation_helper__WEBPACK_IMPORTED_MODULE_0__.default)(
+    container,
+    'div',
+    '',
+    'project-container',
+  );
+  return {
+    projectHeadline,
+    projectContainer,
+  };
+}
+
+function createHeaderElement(container) {
+  const title = (0,_dom_manipulation_helper__WEBPACK_IMPORTED_MODULE_0__.default)(
+    container,
+    'div',
+    '',
+    'header-element',
+    'Home',
+  );
+  return title;
+}
+
+function createTaskPopUp(container) {
+  const popUpContainer = (0,_dom_manipulation_helper__WEBPACK_IMPORTED_MODULE_0__.default)(
+    container,
+    'div',
+    '',
+    'pop-up-container',
+  );
+  const popUp = (0,_dom_manipulation_helper__WEBPACK_IMPORTED_MODULE_0__.default)(popUpContainer, 'form', '', 'pop-up');
+  const titleInput = (0,_dom_manipulation_helper__WEBPACK_IMPORTED_MODULE_0__.default)(popUp, 'input', '', 'title-input');
+  const detailsInput = (0,_dom_manipulation_helper__WEBPACK_IMPORTED_MODULE_0__.default)(popUp, 'input', '', 'details-input');
+  const dueDateInput = (0,_dom_manipulation_helper__WEBPACK_IMPORTED_MODULE_0__.default)(popUp, 'input', '', 'due-date-input');
+  const priorityInput = (0,_dom_manipulation_helper__WEBPACK_IMPORTED_MODULE_0__.default)(popUp, 'div', '', 'priority-div');
+  const submitButton = (0,_dom_manipulation_helper__WEBPACK_IMPORTED_MODULE_0__.default)(
+    popUp,
+    'button',
+    '',
+    'pop-up-submit',
+    'Submit',
+  );
+  const priorityLabel = (0,_dom_manipulation_helper__WEBPACK_IMPORTED_MODULE_0__.default)(
+    priorityInput,
+    'div',
+    '',
+    'priority-label',
+    'Priority',
+  );
+  const low = (0,_dom_manipulation_helper__WEBPACK_IMPORTED_MODULE_0__.default)(priorityInput, 'div', '', 'priority-low', 'LOW');
+  const medium = (0,_dom_manipulation_helper__WEBPACK_IMPORTED_MODULE_0__.default)(
+    priorityInput,
+    'div',
+    '',
+    'priority-medium',
+    'MEDIUM',
+  );
+  const high = (0,_dom_manipulation_helper__WEBPACK_IMPORTED_MODULE_0__.default)(
+    priorityInput,
+    'div',
+    '',
+    'priority-high',
+    'HIGH',
+  );
+
+  titleInput.setAttribute('placeholder', 'Title');
+  titleInput.setAttribute('required', '');
+  detailsInput.setAttribute('placeholder', 'Details');
+  dueDateInput.setAttribute('placeholder', 'Due Date');
+  dueDateInput.setAttribute('type', 'date');
+  dueDateInput.setAttribute('required', '');
+
+  low.addEventListener('click', () => {
+    low.setAttribute('id', 'priority-low-checked');
+    medium.setAttribute('id', 'priority-medium');
+    high.setAttribute('id', 'priority-high');
+  });
+  medium.addEventListener('click', () => {
+    low.setAttribute('id', 'priority-low');
+    medium.setAttribute('id', 'priority-medium-checked');
+    high.setAttribute('id', 'priority-high');
+  });
+  high.addEventListener('click', () => {
+    low.setAttribute('id', 'priority-low');
+    medium.setAttribute('id', 'priority-medium');
+    high.setAttribute('id', 'priority-high-checked');
+  });
+
+  // this closes the pop-up form if user clicks outside of the form
+  popUpContainer.addEventListener('click', (event) => {
+    if (
+      event.target !== popUp
+      && event.target.parentNode !== popUp
+      && event.target.parentNode !== priorityInput
+    ) {
+      titleInput.value = '';
+      detailsInput.value = '';
+      dueDateInput.value = '';
+      low.setAttribute('id', 'priority-low');
+      medium.setAttribute('id', 'priority-medium');
+      high.setAttribute('id', 'priority-high');
+      popUpContainer.style.display = 'none';
+    }
+  });
+}
+
+function createAddTaskButton(container) {
+  const addTaskButton = (0,_dom_manipulation_helper__WEBPACK_IMPORTED_MODULE_0__.default)(
+    container,
+    'button',
+    '',
+    'add-task-button',
+  );
+  addTaskButton.innerHTML = '<span class="material-icons">add</span>Add Task';
+
+  addTaskButton.addEventListener('click', () => {
+    const popUpContainer = document.querySelector('#pop-up-container');
+    popUpContainer.style.display = 'grid';
+  });
+}
+
+function createTaskContainer(container) {
+  const taskContainer = (0,_dom_manipulation_helper__WEBPACK_IMPORTED_MODULE_0__.default)(
+    container,
+    'div',
+    '',
+    'task-container',
+  );
+  return taskContainer;
+}
+
+function displayInitialElements() {
+  const navbar = document.querySelector('#navigation-bar');
+  const dynamicDisplay = document.querySelector('#dynamic-display');
+  createNavbarElements(navbar);
+  createNavbarProjectElements(navbar);
+  createHeaderElement(dynamicDisplay);
+  createTaskPopUp(dynamicDisplay);
+  createAddTaskButton(dynamicDisplay);
+  createTaskContainer(dynamicDisplay);
+}
+
+// Displays current project title in header
+function changeHeader(name) {
+  const header = document.querySelector('#header-element');
+  header.textContent = name;
+}
+
+
+
 
 /***/ })
 
@@ -3857,13 +4152,14 @@ var __webpack_exports__ = {};
   !*** ./src/index.js ***!
   \**********************/
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _display_module__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./display-module */ "./src/display-module.js");
-/* harmony import */ var _logic_module__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./logic-module */ "./src/logic-module.js");
+/* harmony import */ var _dom_manipulation__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./dom-manipulation */ "./src/dom-manipulation.js");
+/* harmony import */ var _app_logic__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./app-logic */ "./src/app-logic.js");
 
 
-    
-(0,_display_module__WEBPACK_IMPORTED_MODULE_0__.displayNavbar)();
-(0,_logic_module__WEBPACK_IMPORTED_MODULE_1__.createNewTask)();
+
+(0,_dom_manipulation__WEBPACK_IMPORTED_MODULE_0__.displayInitialElements)();
+(0,_app_logic__WEBPACK_IMPORTED_MODULE_1__.runLogic)();
+
 })();
 
 /******/ })()
