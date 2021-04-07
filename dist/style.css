@@ -67,6 +67,15 @@ body {
     font-size: 1.5rem;
     font-family: 'Karla', sans-serif;
     padding: 1rem;
+    padding-right: 0rem;
+    display: flex;
+    align-items: center;
+}
+
+.nav-project span {
+    margin-left: auto;
+    cursor: pointer;
+    color: rgb(43, 43, 43);
 }
 
 #np-button {
@@ -141,7 +150,7 @@ body {
     color: rgb(43, 43, 43);
 }
 
-#dd-project-title {
+#header-element {
     grid-row: 1/2;
     box-sizing: border-box;
     align-self: center;

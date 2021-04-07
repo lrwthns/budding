@@ -1,5 +1,5 @@
-import { displayNavbar } from './display-module';
-import { createNewTask} from './logic-module';
-    
-displayNavbar();
-createNewTask();
+import { displayInitialElements } from './dom-manipulation';
+import { runLogic } from './app-logic';
+
+displayInitialElements();
+runLogic();
