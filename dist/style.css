@@ -10,7 +10,6 @@ body {
     grid-template-rows: 1fr;
     margin: 0;
     padding: 0;
-    height: 100%;
 }
 
 #navigation-bar {

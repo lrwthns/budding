@@ -9,6 +9,9 @@ export default function createNewElement(
   container.appendChild(element);
   if (className !== '') {
     element.classList.add(className);
+    if (idName !== '') {
+      element.setAttribute('id', idName);
+    }
   } else {
     element.setAttribute('id', idName);
   }

@@ -1,5 +1,3 @@
-import { displayInitialElements } from './dom-manipulation';
-import { runLogic } from './app-logic';
+import { updateDisplay } from './dom-manipulation';
 
-displayInitialElements();
-runLogic();
+updateDisplay();
