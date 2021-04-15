@@ -4,9 +4,26 @@
 const userModule = (() => {
   const taskList = [];
   const projectList = [];
+  function changeTaskStatus(taskId, newBool) {
+    for (let i = 0; i < taskList.length; i++) {
+      if (taskList[i].id === taskId) {
+        taskList[i].taskIsComplete = newBool;
+      }
+    }
+  }
+  function removeTaskFromList(taskId) {
+    for (let i = 0; i < taskList.length; i++) {
+      if (taskList[i].id === taskId) {
+        taskList.splice(i, 1);
+        console.log(taskList);
+      }
+    }
+  }
   return {
     taskList,
     projectList,
+    changeTaskStatus,
+    removeTaskFromList,
   };
 })();
 
@@ -26,8 +43,10 @@ function projectFactory(name, tasks) {
 function taskFactory(title, details, date, priority, project = 'Home') {
   const getObjLiteral = () => {
     const taskIsComplete = false;
+    // generate a random id for each task
+    const id = Date.now();
     return {
-      title, details, date, priority, project, taskIsComplete,
+      id, title, details, date, priority, project, taskIsComplete,
     };
   };
   return {
@@ -40,17 +59,3 @@ export {
   projectFactory,
   taskFactory,
 };
-
-// function removeTaskFromList(taskTitle, taskDate, container) {
-//   // eslint-disable-next-line consistent-return
-//   function findTaskIndex() {
-//     for (let i = 0; i < taskList.length; i++) {
-//       if (taskList[i].title === taskTitle && taskList[i].date === taskDate) {
-//         return i;
-//       }
-//     }
-//   }
-//   taskList.splice(findTaskIndex(), 1);
-//   console.log(taskList);
-//   showTaskList(taskList, container);
-// }

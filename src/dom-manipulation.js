@@ -21,6 +21,78 @@ function cleanContainer(container) {
   }
 }
 
+function displayTasks(arr, container, callback) {
+  cleanContainer(container);
+  const projectName = document.querySelector('#header-element').textContent;
+  if (projectName === 'Home') {
+    // this displays all tasks
+    for (let i = 0; i < arr.length; i++) {
+      // let taskDueDate = format(new Date(arr[i].date),'MMMM do');
+      // callback(arr[i].title, taskDueDate, arr[i].priority,
+      // container, arr[i].id, arr[i].taskIsComplete);
+      callback(
+        arr[i].title,
+        arr[i].date,
+        arr[i].priority,
+        container,
+        arr[i].id,
+        arr[i].taskIsComplete,
+      );
+    }
+  } else if (projectName === 'Today') {
+    // this checks for tasks which are due today and put them in an array
+    const today = format(new Date(), 'y-MM-dd');
+    const todayArr = arr.filter((task) => task.date === today);
+    for (let i = 0; i < todayArr.length; i++) {
+      const taskDueDate = format(new Date(todayArr[i].date), 'MMMM do');
+      callback(
+        todayArr[i].title,
+        taskDueDate,
+        todayArr[i].priority,
+        container,
+        todayArr[i].id,
+        todayArr[i].taskIsComplete,
+      );
+    }
+  } else if (projectName === 'This Week') {
+    // this checks for tasks which are due in the incoming week and put them in an array
+    const thisWeekArr = arr.filter((task) => {
+      const today = new Date();
+      const beforeToday = subDays(today, 1);
+      const endOfWeek = addDays(today, 6);
+      return (
+        isAfter(parseISO(task.date), beforeToday)
+        && isBefore(parseISO(task.date), endOfWeek)
+      );
+    });
+    for (let i = 0; i < thisWeekArr.length; i++) {
+      const taskDueDate = format(new Date(thisWeekArr[i].date), 'MMMM do');
+      callback(
+        thisWeekArr[i].title,
+        taskDueDate,
+        thisWeekArr[i].priority,
+        container,
+        thisWeekArr[i].id,
+        thisWeekArr[i].taskIsComplete,
+      );
+    }
+  } else {
+    // this checks for tasks that belong in a project category
+    const projectArr = arr.filter((task) => task.project === projectName);
+    for (let i = 0; i < projectArr.length; i++) {
+      const taskDueDate = format(new Date(projectArr[i].date), 'MMMM do');
+      callback(
+        projectArr[i].title,
+        taskDueDate,
+        projectArr[i].priority,
+        container,
+        projectArr[i].id,
+        projectArr[i].taskIsComplete,
+      );
+    }
+  }
+}
+
 function createProject(name, container) {
   const project = createNewElement(container, 'div', 'nav-project', '', name);
   const projectDelete = createNewElement(
@@ -37,8 +109,9 @@ function createProject(name, container) {
   };
 }
 
-function createTask(name, date, priority, container) {
+function createTask(name, date, priority, container, id, taskIsComplete) {
   const task = createNewElement(container, 'li', 'user-tasks', '');
+  const taskId = id;
   const taskLeftSide = createNewElement(task, 'div', '', 'task-left-side');
   const taskRightSide = createNewElement(task, 'div', '', 'task-right-side');
   const taskPriority = createNewElement(
@@ -106,89 +179,29 @@ function createTask(name, date, priority, container) {
       setPriority(priority);
     }
   }
-
-  //let tasks = document.querySelectorAll('.user-tasks'); 
-  // tasks.forEach((task) => {
-  //   task.delete.addEventListener()
-  //   task.edit.addEventListener()
-  //   task.toggle.addEventListener()
-  // })
+  toggleTask(taskIsComplete);
 
   taskCheckbox.addEventListener('click', () => {
+    let taskStatus = false;
     if (taskCheckbox.textContent === 'radio_button_unchecked') {
-      toggleTask(true);
-    } else {
-      toggleTask(false);
+      taskStatus = true;
     }
+    User.changeTaskStatus(taskId, taskStatus);
+    toggleTask(taskStatus);
+    console.log(User.taskList);
   });
 
-  // taskDelete.addEventListener('click', () => {
-  //   logic.removeTaskFromList(taskDesc.textContent, taskDueDate.textContent);
-  // });
+  taskDelete.addEventListener('click', () => {
+    const taskContainer = document.querySelector('#task-container');
+    User.removeTaskFromList(taskId);
+    displayTasks(User.taskList, taskContainer, createTask);
+  });
 }
 
 function displayProjects(arr, container) {
   cleanContainer(container);
   for (let i = 0; i < arr.length; i++) {
     createProject(arr[i], container);
-  }
-}
-
-function displayTasks(arr, container) {
-  cleanContainer(container);
-  const projectName = document.querySelector('#header-element').textContent;
-  if (projectName === 'Home') {
-    // this displays all tasks
-    for (let i = 0; i < arr.length; i++) {
-      // let taskDueDate = format(new Date(arr[i].date),'MMMM do');
-      // createTask(arr[i].title, taskDueDate, arr[i].priority, container);
-      createTask(arr[i].title, arr[i].date, arr[i].priority, container);
-    }
-  } else if (projectName === 'Today') {
-    // this checks for tasks which are due today and put them in an array
-    const today = format(new Date(), 'y-MM-dd');
-    const todayArr = arr.filter((task) => task.date === today);
-    for (let i = 0; i < todayArr.length; i++) {
-      const taskDueDate = format(new Date(todayArr[i].date), 'MMMM do');
-      createTask(
-        todayArr[i].title,
-        taskDueDate,
-        todayArr[i].priority,
-        container,
-      );
-    }
-  } else if (projectName === 'This Week') {
-    // this checks for tasks which are due in the incoming week and put them in an array
-    const thisWeekArr = arr.filter((task) => {
-      const today = new Date();
-      const beforeToday = subDays(today, 1);
-      const endOfWeek = addDays(today, 6);
-      return (
-        isAfter(parseISO(task.date), beforeToday)
-        && isBefore(parseISO(task.date), endOfWeek)
-      );
-    });
-    for (let i = 0; i < thisWeekArr.length; i++) {
-      const taskDueDate = format(new Date(thisWeekArr[i].date), 'MMMM do');
-      createTask(
-        thisWeekArr[i].title,
-        taskDueDate,
-        thisWeekArr[i].priority,
-        container,
-      );
-    }
-  } else {
-    // this checks for tasks that belong in a project category
-    const projectArr = arr.filter((task) => task.project === projectName);
-    for (let i = 0; i < projectArr.length; i++) {
-      const taskDueDate = format(new Date(projectArr[i].date), 'MMMM do');
-      createTask(
-        projectArr[i].title,
-        taskDueDate,
-        projectArr[i].priority,
-        container,
-      );
-    }
   }
 }
 
@@ -222,7 +235,7 @@ const createNavbarElements = (container) => {
     element.addEventListener('click', () => {
       const taskContainer = document.querySelector('#task-container');
       changeHeader(element.textContent);
-      displayTasks(User.taskList, taskContainer);
+      displayTasks(User.taskList, taskContainer, createTask);
     });
   });
 };
@@ -300,7 +313,7 @@ function createProjectForm(container) {
         const str = project.textContent;
         const newStr = str.slice(0, str.length - 6);
         changeHeader(newStr);
-        displayTasks(User.taskList, taskContainer);
+        displayTasks(User.taskList, taskContainer, createTask);
       });
     });
   });
@@ -389,6 +402,16 @@ function createTaskPopUp(container) {
   dueDateInput.setAttribute('type', 'date');
   // dueDateInput.setAttribute('required', '');
 
+  function cleanForm() {
+    titleInput.value = '';
+    detailsInput.value = '';
+    dueDateInput.value = '';
+    low.setAttribute('id', 'priority-low');
+    medium.setAttribute('id', 'priority-medium');
+    high.setAttribute('id', 'priority-high');
+    popUpContainer.style.display = 'none';
+  }
+
   low.addEventListener('click', () => {
     low.setAttribute('id', 'priority-low-checked');
     medium.setAttribute('id', 'priority-medium');
@@ -415,13 +438,7 @@ function createTaskPopUp(container) {
       && event.target.parentNode !== popUp
       && event.target.parentNode !== priorityInput
     ) {
-      titleInput.value = '';
-      detailsInput.value = '';
-      dueDateInput.value = '';
-      low.setAttribute('id', 'priority-low');
-      medium.setAttribute('id', 'priority-medium');
-      high.setAttribute('id', 'priority-high');
-      popUpContainer.style.display = 'none';
+      cleanForm();
     }
   });
 
@@ -429,7 +446,10 @@ function createTaskPopUp(container) {
   popUp.addEventListener('submit', (event) => {
     event.preventDefault();
     const taskContainer = document.querySelector('#task-container');
-    const header = document.querySelector('#header-element').textContent;
+    let header = document.querySelector('#header-element').textContent;
+    if (header === 'This Week' || header === 'Today') {
+      header = 'Home';
+    }
     const newTask = Task(
       titleInput.value,
       detailsInput.value,
@@ -439,8 +459,8 @@ function createTaskPopUp(container) {
     );
     User.taskList.push(newTask.getObjLiteral());
     console.log(User.taskList);
-    displayTasks(User.taskList, taskContainer);
-    popUpContainer.style.display = 'none';
+    displayTasks(User.taskList, taskContainer, createTask);
+    cleanForm();
   });
 }
 

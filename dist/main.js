@@ -3423,9 +3423,26 @@ __webpack_require__.r(__webpack_exports__);
 const userModule = (() => {
   const taskList = [];
   const projectList = [];
+  function changeTaskStatus(taskId, newBool) {
+    for (let i = 0; i < taskList.length; i++) {
+      if (taskList[i].id === taskId) {
+        taskList[i].taskIsComplete = newBool;
+      }
+    }
+  }
+  function removeTaskFromList(taskId) {
+    for (let i = 0; i < taskList.length; i++) {
+      if (taskList[i].id === taskId) {
+        taskList.splice(i, 1);
+        console.log(taskList);
+      }
+    }
+  }
   return {
     taskList,
     projectList,
+    changeTaskStatus,
+    removeTaskFromList,
   };
 })();
 
@@ -3445,8 +3462,10 @@ function projectFactory(name, tasks) {
 function taskFactory(title, details, date, priority, project = 'Home') {
   const getObjLiteral = () => {
     const taskIsComplete = false;
+    // generate a random id for each task
+    const id = Date.now();
     return {
-      title, details, date, priority, project, taskIsComplete,
+      id, title, details, date, priority, project, taskIsComplete,
     };
   };
   return {
@@ -3455,20 +3474,6 @@ function taskFactory(title, details, date, priority, project = 'Home') {
 }
 
 
-
-// function removeTaskFromList(taskTitle, taskDate, container) {
-//   // eslint-disable-next-line consistent-return
-//   function findTaskIndex() {
-//     for (let i = 0; i < taskList.length; i++) {
-//       if (taskList[i].title === taskTitle && taskList[i].date === taskDate) {
-//         return i;
-//       }
-//     }
-//   }
-//   taskList.splice(findTaskIndex(), 1);
-//   console.log(taskList);
-//   showTaskList(taskList, container);
-// }
 
 
 /***/ }),
@@ -3541,6 +3546,78 @@ function cleanContainer(container) {
   }
 }
 
+function displayTasks(arr, container, callback) {
+  cleanContainer(container);
+  const projectName = document.querySelector('#header-element').textContent;
+  if (projectName === 'Home') {
+    // this displays all tasks
+    for (let i = 0; i < arr.length; i++) {
+      // let taskDueDate = format(new Date(arr[i].date),'MMMM do');
+      // callback(arr[i].title, taskDueDate, arr[i].priority,
+      // container, arr[i].id, arr[i].taskIsComplete);
+      callback(
+        arr[i].title,
+        arr[i].date,
+        arr[i].priority,
+        container,
+        arr[i].id,
+        arr[i].taskIsComplete,
+      );
+    }
+  } else if (projectName === 'Today') {
+    // this checks for tasks which are due today and put them in an array
+    const today = (0,date_fns__WEBPACK_IMPORTED_MODULE_2__.default)(new Date(), 'y-MM-dd');
+    const todayArr = arr.filter((task) => task.date === today);
+    for (let i = 0; i < todayArr.length; i++) {
+      const taskDueDate = (0,date_fns__WEBPACK_IMPORTED_MODULE_2__.default)(new Date(todayArr[i].date), 'MMMM do');
+      callback(
+        todayArr[i].title,
+        taskDueDate,
+        todayArr[i].priority,
+        container,
+        todayArr[i].id,
+        todayArr[i].taskIsComplete,
+      );
+    }
+  } else if (projectName === 'This Week') {
+    // this checks for tasks which are due in the incoming week and put them in an array
+    const thisWeekArr = arr.filter((task) => {
+      const today = new Date();
+      const beforeToday = (0,date_fns__WEBPACK_IMPORTED_MODULE_3__.default)(today, 1);
+      const endOfWeek = (0,date_fns__WEBPACK_IMPORTED_MODULE_4__.default)(today, 6);
+      return (
+        (0,date_fns__WEBPACK_IMPORTED_MODULE_5__.default)((0,date_fns__WEBPACK_IMPORTED_MODULE_6__.default)(task.date), beforeToday)
+        && (0,date_fns__WEBPACK_IMPORTED_MODULE_7__.default)((0,date_fns__WEBPACK_IMPORTED_MODULE_6__.default)(task.date), endOfWeek)
+      );
+    });
+    for (let i = 0; i < thisWeekArr.length; i++) {
+      const taskDueDate = (0,date_fns__WEBPACK_IMPORTED_MODULE_2__.default)(new Date(thisWeekArr[i].date), 'MMMM do');
+      callback(
+        thisWeekArr[i].title,
+        taskDueDate,
+        thisWeekArr[i].priority,
+        container,
+        thisWeekArr[i].id,
+        thisWeekArr[i].taskIsComplete,
+      );
+    }
+  } else {
+    // this checks for tasks that belong in a project category
+    const projectArr = arr.filter((task) => task.project === projectName);
+    for (let i = 0; i < projectArr.length; i++) {
+      const taskDueDate = (0,date_fns__WEBPACK_IMPORTED_MODULE_2__.default)(new Date(projectArr[i].date), 'MMMM do');
+      callback(
+        projectArr[i].title,
+        taskDueDate,
+        projectArr[i].priority,
+        container,
+        projectArr[i].id,
+        projectArr[i].taskIsComplete,
+      );
+    }
+  }
+}
+
 function createProject(name, container) {
   const project = (0,_dom_manipulation_helper__WEBPACK_IMPORTED_MODULE_0__.default)(container, 'div', 'nav-project', '', name);
   const projectDelete = (0,_dom_manipulation_helper__WEBPACK_IMPORTED_MODULE_0__.default)(
@@ -3557,8 +3634,9 @@ function createProject(name, container) {
   };
 }
 
-function createTask(name, date, priority, container) {
+function createTask(name, date, priority, container, id, taskIsComplete) {
   const task = (0,_dom_manipulation_helper__WEBPACK_IMPORTED_MODULE_0__.default)(container, 'li', 'user-tasks', '');
+  const taskId = id;
   const taskLeftSide = (0,_dom_manipulation_helper__WEBPACK_IMPORTED_MODULE_0__.default)(task, 'div', '', 'task-left-side');
   const taskRightSide = (0,_dom_manipulation_helper__WEBPACK_IMPORTED_MODULE_0__.default)(task, 'div', '', 'task-right-side');
   const taskPriority = (0,_dom_manipulation_helper__WEBPACK_IMPORTED_MODULE_0__.default)(
@@ -3626,89 +3704,29 @@ function createTask(name, date, priority, container) {
       setPriority(priority);
     }
   }
-
-  //let tasks = document.querySelectorAll('.user-tasks'); 
-  // tasks.forEach((task) => {
-  //   task.delete.addEventListener()
-  //   task.edit.addEventListener()
-  //   task.toggle.addEventListener()
-  // })
+  toggleTask(taskIsComplete);
 
   taskCheckbox.addEventListener('click', () => {
+    let taskStatus = false;
     if (taskCheckbox.textContent === 'radio_button_unchecked') {
-      toggleTask(true);
-    } else {
-      toggleTask(false);
+      taskStatus = true;
     }
+    _app_logic__WEBPACK_IMPORTED_MODULE_1__.userModule.changeTaskStatus(taskId, taskStatus);
+    toggleTask(taskStatus);
+    console.log(_app_logic__WEBPACK_IMPORTED_MODULE_1__.userModule.taskList);
   });
 
-  // taskDelete.addEventListener('click', () => {
-  //   logic.removeTaskFromList(taskDesc.textContent, taskDueDate.textContent);
-  // });
+  taskDelete.addEventListener('click', () => {
+    const taskContainer = document.querySelector('#task-container');
+    _app_logic__WEBPACK_IMPORTED_MODULE_1__.userModule.removeTaskFromList(taskId);
+    displayTasks(_app_logic__WEBPACK_IMPORTED_MODULE_1__.userModule.taskList, taskContainer, createTask);
+  });
 }
 
 function displayProjects(arr, container) {
   cleanContainer(container);
   for (let i = 0; i < arr.length; i++) {
     createProject(arr[i], container);
-  }
-}
-
-function displayTasks(arr, container) {
-  cleanContainer(container);
-  const projectName = document.querySelector('#header-element').textContent;
-  if (projectName === 'Home') {
-    // this displays all tasks
-    for (let i = 0; i < arr.length; i++) {
-      // let taskDueDate = format(new Date(arr[i].date),'MMMM do');
-      // createTask(arr[i].title, taskDueDate, arr[i].priority, container);
-      createTask(arr[i].title, arr[i].date, arr[i].priority, container);
-    }
-  } else if (projectName === 'Today') {
-    // this checks for tasks which are due today and put them in an array
-    const today = (0,date_fns__WEBPACK_IMPORTED_MODULE_2__.default)(new Date(), 'y-MM-dd');
-    const todayArr = arr.filter((task) => task.date === today);
-    for (let i = 0; i < todayArr.length; i++) {
-      const taskDueDate = (0,date_fns__WEBPACK_IMPORTED_MODULE_2__.default)(new Date(todayArr[i].date), 'MMMM do');
-      createTask(
-        todayArr[i].title,
-        taskDueDate,
-        todayArr[i].priority,
-        container,
-      );
-    }
-  } else if (projectName === 'This Week') {
-    // this checks for tasks which are due in the incoming week and put them in an array
-    const thisWeekArr = arr.filter((task) => {
-      const today = new Date();
-      const beforeToday = (0,date_fns__WEBPACK_IMPORTED_MODULE_3__.default)(today, 1);
-      const endOfWeek = (0,date_fns__WEBPACK_IMPORTED_MODULE_4__.default)(today, 6);
-      return (
-        (0,date_fns__WEBPACK_IMPORTED_MODULE_5__.default)((0,date_fns__WEBPACK_IMPORTED_MODULE_6__.default)(task.date), beforeToday)
-        && (0,date_fns__WEBPACK_IMPORTED_MODULE_7__.default)((0,date_fns__WEBPACK_IMPORTED_MODULE_6__.default)(task.date), endOfWeek)
-      );
-    });
-    for (let i = 0; i < thisWeekArr.length; i++) {
-      const taskDueDate = (0,date_fns__WEBPACK_IMPORTED_MODULE_2__.default)(new Date(thisWeekArr[i].date), 'MMMM do');
-      createTask(
-        thisWeekArr[i].title,
-        taskDueDate,
-        thisWeekArr[i].priority,
-        container,
-      );
-    }
-  } else {
-    // this checks for tasks that belong in a project category
-    const projectArr = arr.filter((task) => task.project === projectName);
-    for (let i = 0; i < projectArr.length; i++) {
-      const taskDueDate = (0,date_fns__WEBPACK_IMPORTED_MODULE_2__.default)(new Date(projectArr[i].date), 'MMMM do');
-      createTask(
-        projectArr[i].title,
-        taskDueDate,
-        projectArr[i].priority,
-        container,
-      );
-    }
   }
 }
 
@@ -3742,7 +3760,7 @@ const createNavbarElements = (container) => {
     element.addEventListener('click', () => {
       const taskContainer = document.querySelector('#task-container');
       changeHeader(element.textContent);
-      displayTasks(_app_logic__WEBPACK_IMPORTED_MODULE_1__.userModule.taskList, taskContainer);
+      displayTasks(_app_logic__WEBPACK_IMPORTED_MODULE_1__.userModule.taskList, taskContainer, createTask);
     });
   });
 };
@@ -3820,7 +3838,7 @@ function createProjectForm(container) {
         const str = project.textContent;
         const newStr = str.slice(0, str.length - 6);
         changeHeader(newStr);
-        displayTasks(_app_logic__WEBPACK_IMPORTED_MODULE_1__.userModule.taskList, taskContainer);
+        displayTasks(_app_logic__WEBPACK_IMPORTED_MODULE_1__.userModule.taskList, taskContainer, createTask);
       });
     });
   });
@@ -3909,6 +3927,16 @@ function createTaskPopUp(container) {
   dueDateInput.setAttribute('type', 'date');
   // dueDateInput.setAttribute('required', '');
 
+  function cleanForm() {
+    titleInput.value = '';
+    detailsInput.value = '';
+    dueDateInput.value = '';
+    low.setAttribute('id', 'priority-low');
+    medium.setAttribute('id', 'priority-medium');
+    high.setAttribute('id', 'priority-high');
+    popUpContainer.style.display = 'none';
+  }
+
   low.addEventListener('click', () => {
     low.setAttribute('id', 'priority-low-checked');
     medium.setAttribute('id', 'priority-medium');
@@ -3935,13 +3963,7 @@ function createTaskPopUp(container) {
       && event.target.parentNode !== popUp
       && event.target.parentNode !== priorityInput
     ) {
-      titleInput.value = '';
-      detailsInput.value = '';
-      dueDateInput.value = '';
-      low.setAttribute('id', 'priority-low');
-      medium.setAttribute('id', 'priority-medium');
-      high.setAttribute('id', 'priority-high');
-      popUpContainer.style.display = 'none';
+      cleanForm();
     }
   });
 
@@ -3949,7 +3971,10 @@ function createTaskPopUp(container) {
   popUp.addEventListener('submit', (event) => {
     event.preventDefault();
     const taskContainer = document.querySelector('#task-container');
-    const header = document.querySelector('#header-element').textContent;
+    let header = document.querySelector('#header-element').textContent;
+    if (header === 'This Week' || header === 'Today') {
+      header = 'Home';
+    }
     const newTask = (0,_app_logic__WEBPACK_IMPORTED_MODULE_1__.taskFactory)(
       titleInput.value,
       detailsInput.value,
@@ -3959,8 +3984,8 @@ function createTaskPopUp(container) {
     );
     _app_logic__WEBPACK_IMPORTED_MODULE_1__.userModule.taskList.push(newTask.getObjLiteral());
     console.log(_app_logic__WEBPACK_IMPORTED_MODULE_1__.userModule.taskList);
-    displayTasks(_app_logic__WEBPACK_IMPORTED_MODULE_1__.userModule.taskList, taskContainer);
-    popUpContainer.style.display = 'none';
+    displayTasks(_app_logic__WEBPACK_IMPORTED_MODULE_1__.userModule.taskList, taskContainer, createTask);
+    cleanForm();
   });
 }
 
