@@ -3459,8 +3459,14 @@ function projectFactory(name, tasks) {
   };
 }
 
-function taskFactory(title, details, date, priority, project = 'Home') {
+function taskFactory(title, info, date, priority, project = 'Home') {
   const getObjLiteral = () => {
+    let details;
+    if (info === '') {
+      details = 'There are no details for this task.';
+    } else {
+      details = info;
+    }
     const taskIsComplete = false;
     // generate a random id for each task
     const id = Date.now();
@@ -3554,7 +3560,7 @@ function displayTasks(arr, container, callback) {
     for (let i = 0; i < arr.length; i++) {
       // let taskDueDate = format(new Date(arr[i].date),'MMMM do');
       // callback(arr[i].title, taskDueDate, arr[i].priority,
-      // container, arr[i].id, arr[i].taskIsComplete);
+      // container, arr[i].id, arr[i].taskIsComplete, arr[i].details,);
       callback(
         arr[i].title,
         arr[i].date,
@@ -3562,6 +3568,7 @@ function displayTasks(arr, container, callback) {
         container,
         arr[i].id,
         arr[i].taskIsComplete,
+        arr[i].details,
       );
     }
   } else if (projectName === 'Today') {
@@ -3577,6 +3584,7 @@ function displayTasks(arr, container, callback) {
         container,
         todayArr[i].id,
         todayArr[i].taskIsComplete,
+        todayArr[i].details,
       );
     }
   } else if (projectName === 'This Week') {
@@ -3599,6 +3607,7 @@ function displayTasks(arr, container, callback) {
         container,
         thisWeekArr[i].id,
         thisWeekArr[i].taskIsComplete,
+        thisWeekArr[i].details,
       );
     }
   } else {
@@ -3613,6 +3622,7 @@ function displayTasks(arr, container, callback) {
         container,
         projectArr[i].id,
         projectArr[i].taskIsComplete,
+        projectArr[i].details,
       );
     }
   }
@@ -3634,9 +3644,11 @@ function createProject(name, container) {
   };
 }
 
-function createTask(name, date, priority, container, id, taskIsComplete) {
-  const task = (0,_dom_manipulation_helper__WEBPACK_IMPORTED_MODULE_0__.default)(container, 'li', 'user-tasks', '');
+function createTask(name, date, priority, container, id, taskIsComplete, details) {
   const taskId = id;
+  const task = (0,_dom_manipulation_helper__WEBPACK_IMPORTED_MODULE_0__.default)(container, 'li', 'user-tasks', '');
+  const taskDetails = (0,_dom_manipulation_helper__WEBPACK_IMPORTED_MODULE_0__.default)(container, 'div', 'task-details', '', details);
+  let taskDetailsVisible = false;
   const taskLeftSide = (0,_dom_manipulation_helper__WEBPACK_IMPORTED_MODULE_0__.default)(task, 'div', '', 'task-left-side');
   const taskRightSide = (0,_dom_manipulation_helper__WEBPACK_IMPORTED_MODULE_0__.default)(task, 'div', '', 'task-right-side');
   const taskPriority = (0,_dom_manipulation_helper__WEBPACK_IMPORTED_MODULE_0__.default)(
@@ -3705,6 +3717,18 @@ function createTask(name, date, priority, container, id, taskIsComplete) {
     }
   }
   toggleTask(taskIsComplete);
+
+  task.addEventListener('click', (event) => {
+    if (event.target !== taskCheckbox && event.target !== taskDelete && event.target !== taskEdit) {
+      if (taskDetailsVisible === false) {
+        taskDetails.style.display = 'block';
+        taskDetailsVisible = true;
+      } else {
+        taskDetails.style.display = 'none';
+        taskDetailsVisible = false;
+      }
+    }
+  });
 
   taskCheckbox.addEventListener('click', () => {
     let taskStatus = false;
@@ -3886,7 +3910,7 @@ function createTaskPopUp(container) {
   );
   const popUp = (0,_dom_manipulation_helper__WEBPACK_IMPORTED_MODULE_0__.default)(popUpContainer, 'form', '', 'pop-up');
   const titleInput = (0,_dom_manipulation_helper__WEBPACK_IMPORTED_MODULE_0__.default)(popUp, 'input', '', 'title-input');
-  const detailsInput = (0,_dom_manipulation_helper__WEBPACK_IMPORTED_MODULE_0__.default)(popUp, 'input', '', 'details-input');
+  const detailsInput = (0,_dom_manipulation_helper__WEBPACK_IMPORTED_MODULE_0__.default)(popUp, 'textarea', '', 'details-input');
   const dueDateInput = (0,_dom_manipulation_helper__WEBPACK_IMPORTED_MODULE_0__.default)(popUp, 'input', '', 'due-date-input');
   const priorityInput = (0,_dom_manipulation_helper__WEBPACK_IMPORTED_MODULE_0__.default)(popUp, 'div', '', 'priority-div');
   let priority = '';
