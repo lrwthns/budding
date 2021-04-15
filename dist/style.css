@@ -187,6 +187,11 @@ body {
     display: none;
 }
 
+input:-webkit-autofill {
+  -webkit-text-fill-color: rgb(43, 43, 43);
+  -webkit-box-shadow: 0 0 0px 1000px rgb(187, 212, 164) inset;
+}
+
 #pop-up {
     background-color: rgb(43, 43, 43);
     width: 50rem;
@@ -207,7 +212,7 @@ body {
     border: none;
 }
 
-#pop-up input:focus {
+#pop-up input:focus, #details-input:focus {
     outline: none;
     background-color: rgb(187, 212, 164);
     color: rgb(43, 43, 43);
@@ -224,6 +229,10 @@ body {
 }
 
 #details-input {
+    font-size: 1.3rem;
+    font-family: 'Karla', sans-serif;
+    color: rgb(224, 224, 224);
+    padding-left: 1rem;
     box-sizing: border-box;
     grid-column: 1/4;
     grid-row: 2/3;
@@ -232,7 +241,14 @@ body {
     justify-self: center;
     align-self: center;
     text-align: left;
+    padding-top: 1rem;
+    padding-right: 1rem;
     padding-bottom: 14rem;
+    border: none;
+    background-color: transparent;
+    resize: none;
+    outline: none;
+    overflow: hidden;
 }
 
 #due-date-input {
@@ -344,6 +360,12 @@ body {
     margin-right: 1rem;
 }
 
+#task-container {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
 .user-tasks {
     font-size: 1.3rem;
     font-family: 'Karla', sans-serif;
@@ -351,8 +373,8 @@ body {
     grid-template-columns: 1fr 1fr;
     height: 3rem; 
     align-content: center;
-    margin-bottom: 1rem;
     background-color: rgba(187, 212, 164, 0.2);
+    margin-bottom: 1rem;
 }
 
 .user-tasks:hover {
@@ -365,6 +387,18 @@ body {
 
 .user-tasks span:hover {
     color: rgb(0, 0, 0)
+}
+
+.task-details {
+    display: none;
+    font-size: 1.1rem;
+    font-family: 'Karla', sans-serif;
+    background-color: rgba(187, 212, 164, 0.5);
+    padding: 1rem;
+    border: 0.3rem solid rgba(187, 212, 164, 0.8);
+    margin-bottom: 1rem;
+    margin-top: -1rem;
+    overflow-wrap: break-word;
 }
 
 #task-left-side {

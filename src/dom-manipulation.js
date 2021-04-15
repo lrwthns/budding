@@ -29,7 +29,7 @@ function displayTasks(arr, container, callback) {
     for (let i = 0; i < arr.length; i++) {
       // let taskDueDate = format(new Date(arr[i].date),'MMMM do');
       // callback(arr[i].title, taskDueDate, arr[i].priority,
-      // container, arr[i].id, arr[i].taskIsComplete);
+      // container, arr[i].id, arr[i].taskIsComplete, arr[i].details,);
       callback(
         arr[i].title,
         arr[i].date,
@@ -37,6 +37,7 @@ function displayTasks(arr, container, callback) {
         container,
         arr[i].id,
         arr[i].taskIsComplete,
+        arr[i].details,
       );
     }
   } else if (projectName === 'Today') {
@@ -52,6 +53,7 @@ function displayTasks(arr, container, callback) {
         container,
         todayArr[i].id,
         todayArr[i].taskIsComplete,
+        todayArr[i].details,
       );
     }
   } else if (projectName === 'This Week') {
@@ -74,6 +76,7 @@ function displayTasks(arr, container, callback) {
         container,
         thisWeekArr[i].id,
         thisWeekArr[i].taskIsComplete,
+        thisWeekArr[i].details,
       );
     }
   } else {
@@ -88,6 +91,7 @@ function displayTasks(arr, container, callback) {
         container,
         projectArr[i].id,
         projectArr[i].taskIsComplete,
+        projectArr[i].details,
       );
     }
   }
@@ -109,9 +113,11 @@ function createProject(name, container) {
   };
 }
 
-function createTask(name, date, priority, container, id, taskIsComplete) {
-  const task = createNewElement(container, 'li', 'user-tasks', '');
+function createTask(name, date, priority, container, id, taskIsComplete, details) {
   const taskId = id;
+  const task = createNewElement(container, 'li', 'user-tasks', '');
+  const taskDetails = createNewElement(container, 'div', 'task-details', '', details);
+  let taskDetailsVisible = false;
   const taskLeftSide = createNewElement(task, 'div', '', 'task-left-side');
   const taskRightSide = createNewElement(task, 'div', '', 'task-right-side');
   const taskPriority = createNewElement(
@@ -180,6 +186,18 @@ function createTask(name, date, priority, container, id, taskIsComplete) {
     }
   }
   toggleTask(taskIsComplete);
+
+  task.addEventListener('click', (event) => {
+    if (event.target !== taskCheckbox && event.target !== taskDelete && event.target !== taskEdit) {
+      if (taskDetailsVisible === false) {
+        taskDetails.style.display = 'block';
+        taskDetailsVisible = true;
+      } else {
+        taskDetails.style.display = 'none';
+        taskDetailsVisible = false;
+      }
+    }
+  });
 
   taskCheckbox.addEventListener('click', () => {
     let taskStatus = false;
@@ -361,7 +379,7 @@ function createTaskPopUp(container) {
   );
   const popUp = createNewElement(popUpContainer, 'form', '', 'pop-up');
   const titleInput = createNewElement(popUp, 'input', '', 'title-input');
-  const detailsInput = createNewElement(popUp, 'input', '', 'details-input');
+  const detailsInput = createNewElement(popUp, 'textarea', '', 'details-input');
   const dueDateInput = createNewElement(popUp, 'input', '', 'due-date-input');
   const priorityInput = createNewElement(popUp, 'div', '', 'priority-div');
   let priority = '';

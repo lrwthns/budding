@@ -40,8 +40,14 @@ function projectFactory(name, tasks) {
   };
 }
 
-function taskFactory(title, details, date, priority, project = 'Home') {
+function taskFactory(title, info, date, priority, project = 'Home') {
   const getObjLiteral = () => {
+    let details;
+    if (info === '') {
+      details = 'There are no details for this task.';
+    } else {
+      details = info;
+    }
     const taskIsComplete = false;
     // generate a random id for each task
     const id = Date.now();
