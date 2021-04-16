@@ -3423,6 +3423,8 @@ __webpack_require__.r(__webpack_exports__);
 const userModule = (() => {
   const taskList = [];
   const projectList = [];
+  let isEditingTask = false;
+  let currentTaskId = '';
   function changeTaskStatus(taskId, newBool) {
     for (let i = 0; i < taskList.length; i++) {
       if (taskList[i].id === taskId) {
@@ -3438,19 +3440,59 @@ const userModule = (() => {
       }
     }
   }
+  // function removeProjectFromList(projectId) {
+
+  // }
+
+  function showTaskInfo(taskId, container, titleElem, detailsElem, dateElem, low, medium, high) {
+    for (let i = 0; i < taskList.length; i++) {
+      if (taskList[i].id === taskId) {
+        if (taskList[i].priority === 'low') {
+          low.setAttribute('id', 'priority-low-checked');
+        } else if (taskList[i].priority === 'medium') {
+          medium.setAttribute('id', 'priority-medium-checked');
+        } else if (taskList[i].priority === 'high') {
+          high.setAttribute('id', 'priority-high-checked');
+        }
+        titleElem.value = taskList[i].title;
+        detailsElem.value = taskList[i].details;
+        dateElem.value = taskList[i].date;
+        userModule.isEditingTask = true;
+        userModule.currentTaskId = taskId;
+      }
+    }
+    container.style.display = 'grid';
+  }
+  function editTask(taskId, title, details, date, priority) {
+    for (let i = 0; i < taskList.length; i++) {
+      if (taskList[i].id === taskId) {
+        taskList[i].title = title;
+        taskList[i].details = details;
+        taskList[i].date = date;
+        taskList[i].priority = priority;
+        userModule.isEditingTask = false;
+        userModule.currentTaskId = '';
+      }
+    }
+  }
   return {
     taskList,
     projectList,
+    isEditingTask,
+    currentTaskId,
     changeTaskStatus,
     removeTaskFromList,
+    showTaskInfo,
+    editTask,
   };
 })();
 
-function projectFactory(name, tasks) {
+function projectFactory(title, tasks) {
   const getObjLiteral = () => {
-    console.log(name);
+    const id = Date.now();
     return {
-      name,
+      id,
+      title,
       tasks,
     };
   };
@@ -3638,10 +3680,9 @@ function createProject(name, container) {
     'delete',
   );
   projectDelete.setAttribute('id', 'delete-project-button');
-  return {
-    project,
-    projectDelete,
-  };
+  // projectDelete.addEventListener('click', () => {
+
+  // });
 }
 
 function createTask(name, date, priority, container, id, taskIsComplete, details) {
@@ -3744,6 +3785,26 @@ function createTask(name, date, priority, container, id, taskIsComplete, details
     const taskContainer = document.querySelector('#task-container');
     _app_logic__WEBPACK_IMPORTED_MODULE_1__.userModule.removeTaskFromList(taskId);
     displayTasks(_app_logic__WEBPACK_IMPORTED_MODULE_1__.userModule.taskList, taskContainer, createTask);
+  });
+
+  taskEdit.addEventListener('click', () => {
+    const popUpContainer = document.querySelector('#pop-up-container');
+    const titleInput = document.querySelector('#title-input');
+    const detailsInput = document.querySelector('#details-input');
+    const dateInput = document.querySelector('#due-date-input');
+    const low = document.querySelector('#priority-low');
+    const medium = document.querySelector('#priority-medium');
+    const high = document.querySelector('#priority-high');
+    _app_logic__WEBPACK_IMPORTED_MODULE_1__.userModule.showTaskInfo(
+      taskId,
+      popUpContainer,
+      titleInput,
+      detailsInput,
+      dateInput,
+      low,
+      medium,
+      high,
+    );
   });
 }
 
@@ -3995,18 +4056,29 @@ function createTaskPopUp(container) {
   popUp.addEventListener('submit', (event) => {
     event.preventDefault();
     const taskContainer = document.querySelector('#task-container');
-    let header = document.querySelector('#header-element').textContent;
-    if (header === 'This Week' || header === 'Today') {
-      header = 'Home';
+    const isEditing = _app_logic__WEBPACK_IMPORTED_MODULE_1__.userModule.isEditingTask;
+    if (isEditing === false) {
+      let header = document.querySelector('#header-element').textContent;
+      if (header === 'This Week' || header === 'Today') {
+        header = 'Home';
+      }
+      const newTask = (0,_app_logic__WEBPACK_IMPORTED_MODULE_1__.taskFactory)(
+        titleInput.value,
+        detailsInput.value,
+        dueDateInput.value,
+        priority,
+        header,
+      );
+      _app_logic__WEBPACK_IMPORTED_MODULE_1__.userModule.taskList.push(newTask.getObjLiteral());
+    } else {
+      _app_logic__WEBPACK_IMPORTED_MODULE_1__.userModule.editTask(
+        _app_logic__WEBPACK_IMPORTED_MODULE_1__.userModule.currentTaskId,
+        titleInput.value,
+        detailsInput.value,
+        dueDateInput.value,
+        priority,
+      );
     }
-    const newTask = (0,_app_logic__WEBPACK_IMPORTED_MODULE_1__.taskFactory)(
-      titleInput.value,
-      detailsInput.value,
-      dueDateInput.value,
-      priority,
-      header,
-    );
-    _app_logic__WEBPACK_IMPORTED_MODULE_1__.userModule.taskList.push(newTask.getObjLiteral());
     console.log(_app_logic__WEBPACK_IMPORTED_MODULE_1__.userModule.taskList);
     displayTasks(_app_logic__WEBPACK_IMPORTED_MODULE_1__.userModule.taskList, taskContainer, createTask);
     cleanForm();
