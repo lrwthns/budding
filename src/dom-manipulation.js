@@ -21,95 +21,93 @@ function cleanContainer(container) {
   }
 }
 
-function displayTasks(arr, container, callback) {
+function displayTasks(arr, container, callback, projectId = '') {
   cleanContainer(container);
   const projectName = document.querySelector('#header-element').textContent;
   if (projectName === 'Home') {
     // this displays all tasks
     for (let i = 0; i < arr.length; i++) {
-      // let taskDueDate = format(new Date(arr[i].date),'MMMM do');
-      // callback(arr[i].title, taskDueDate, arr[i].priority,
-      // container, arr[i].id, arr[i].taskIsComplete, arr[i].details,);
-      callback(
-        arr[i].title,
-        arr[i].date,
-        arr[i].priority,
-        container,
-        arr[i].id,
-        arr[i].taskIsComplete,
-        arr[i].details,
-      );
+      const taskList = arr[i].tasks;
+      for (let j = 0; j < taskList.length; j++) {
+        // let taskDueDate = format(new Date(arr[i].date),'MMMM do');
+        // callback(arr[i].title, taskDueDate, arr[i].priority,
+        // container, arr[i].id, arr[i].taskIsComplete, arr[i].details,);
+        callback(
+          taskList[j].title,
+          taskList[j].date,
+          taskList[j].priority,
+          container,
+          taskList[j].id,
+          taskList[j].taskIsComplete,
+          taskList[j].details,
+        );
+      }
     }
   } else if (projectName === 'Today') {
     // this checks for tasks which are due today and put them in an array
-    const today = format(new Date(), 'y-MM-dd');
-    const todayArr = arr.filter((task) => task.date === today);
-    for (let i = 0; i < todayArr.length; i++) {
-      const taskDueDate = format(new Date(todayArr[i].date), 'MMMM do');
-      callback(
-        todayArr[i].title,
-        taskDueDate,
-        todayArr[i].priority,
-        container,
-        todayArr[i].id,
-        todayArr[i].taskIsComplete,
-        todayArr[i].details,
-      );
+    for (let i = 0; i < arr.length; i++) {
+      const taskList = arr[i].tasks;
+      const today = format(new Date(), 'y-MM-dd');
+      const todayArr = taskList.filter((task) => task.date === today);
+      for (let j = 0; j < todayArr.length; j++) {
+        const taskDueDate = format(new Date(todayArr[j].date), 'MMMM do');
+        callback(
+          todayArr[j].title,
+          taskDueDate,
+          todayArr[j].priority,
+          container,
+          todayArr[j].id,
+          todayArr[j].taskIsComplete,
+          todayArr[j].details,
+        );
+      }
     }
   } else if (projectName === 'This Week') {
-    // this checks for tasks which are due in the incoming week and put them in an array
-    const thisWeekArr = arr.filter((task) => {
-      const today = new Date();
-      const beforeToday = subDays(today, 1);
-      const endOfWeek = addDays(today, 6);
-      return (
-        isAfter(parseISO(task.date), beforeToday)
-        && isBefore(parseISO(task.date), endOfWeek)
-      );
-    });
-    for (let i = 0; i < thisWeekArr.length; i++) {
-      const taskDueDate = format(new Date(thisWeekArr[i].date), 'MMMM do');
-      callback(
-        thisWeekArr[i].title,
-        taskDueDate,
-        thisWeekArr[i].priority,
-        container,
-        thisWeekArr[i].id,
-        thisWeekArr[i].taskIsComplete,
-        thisWeekArr[i].details,
-      );
+    for (let i = 0; i < arr.length; i++) {
+      const taskList = arr[i].tasks;
+      // this checks for tasks which are due in the incoming week and put them in an array
+      const thisWeekArr = taskList.filter((task) => {
+        const today = new Date();
+        const beforeToday = subDays(today, 1);
+        const endOfWeek = addDays(today, 6);
+        return (
+          isAfter(parseISO(task.date), beforeToday)
+          && isBefore(parseISO(task.date), endOfWeek)
+        );
+      });
+      for (let j = 0; j < thisWeekArr.length; j++) {
+        const taskDueDate = format(new Date(thisWeekArr[j].date), 'MMMM do');
+        callback(
+          thisWeekArr[j].title,
+          taskDueDate,
+          thisWeekArr[j].priority,
+          container,
+          thisWeekArr[j].id,
+          thisWeekArr[j].taskIsComplete,
+          thisWeekArr[j].details,
+        );
+      }
     }
   } else {
     // this checks for tasks that belong in a project category
-    const projectArr = arr.filter((task) => task.project === projectName);
-    for (let i = 0; i < projectArr.length; i++) {
-      const taskDueDate = format(new Date(projectArr[i].date), 'MMMM do');
-      callback(
-        projectArr[i].title,
-        taskDueDate,
-        projectArr[i].priority,
-        container,
-        projectArr[i].id,
-        projectArr[i].taskIsComplete,
-        projectArr[i].details,
-      );
+    for (let i = 0; i < arr.length; i++) {
+      if (arr[i].id === projectId) {
+        const taskList = arr[i].tasks;
+        for (let j = 0; j < taskList.length; j++) {
+          const taskDueDate = format(new Date(taskList[j].date), 'MMMM do');
+          callback(
+            taskList[j].title,
+            taskDueDate,
+            taskList[j].priority,
+            container,
+            taskList[j].id,
+            taskList[j].taskIsComplete,
+            taskList[j].details,
+          );
+        }
+      }
     }
   }
-}
-
-function createProject(name, container) {
-  const project = createNewElement(container, 'div', 'nav-project', '', name);
-  const projectDelete = createNewElement(
-    project,
-    'span',
-    'material-icons',
-    '',
-    'delete',
-  );
-  projectDelete.setAttribute('id', 'delete-project-button');
-  // projectDelete.addEventListener('click', () => {
-
-  // });
 }
 
 function createTask(name, date, priority, container, id, taskIsComplete, details) {
@@ -205,13 +203,14 @@ function createTask(name, date, priority, container, id, taskIsComplete, details
     }
     User.changeTaskStatus(taskId, taskStatus);
     toggleTask(taskStatus);
-    console.log(User.taskList);
+    console.log(User.projectList);
   });
 
   taskDelete.addEventListener('click', () => {
     const taskContainer = document.querySelector('#task-container');
+    const projectId = User.projectList[User.currentProjectIndex].id;
     User.removeTaskFromList(taskId);
-    displayTasks(User.taskList, taskContainer, createTask);
+    displayTasks(User.projectList, taskContainer, createTask, projectId);
   });
 
   taskEdit.addEventListener('click', () => {
@@ -235,10 +234,30 @@ function createTask(name, date, priority, container, id, taskIsComplete, details
   });
 }
 
+function createProject(id, name, container, callback) {
+  const project = createNewElement(container, 'div', 'nav-project', '', name);
+  const projectDelete = createNewElement(
+    project,
+    'span',
+    'material-icons',
+    '',
+    'delete',
+  );
+  projectDelete.setAttribute('id', 'delete-project-button');
+  projectDelete.addEventListener('click', () => {
+    const taskContainer = document.querySelector('#task-container');
+    User.removeProjectFromList(id);
+    console.log(User.currentProjectIndex);
+    const projectId = User.projectList[User.currentProjectIndex].id;
+    callback(User.projectList, container);
+    displayTasks(User.projectList, taskContainer, createTask, projectId);
+  });
+}
+
 function displayProjects(arr, container) {
   cleanContainer(container);
-  for (let i = 0; i < arr.length; i++) {
-    createProject(arr[i], container);
+  for (let i = 1; i < arr.length; i++) {
+    createProject(arr[i].id, arr[i].title, container, displayProjects);
   }
 }
 
@@ -270,9 +289,10 @@ const createNavbarElements = (container) => {
 
   navbarElements.forEach((element) => {
     element.addEventListener('click', () => {
+      User.currentProjectIndex = 0;
       const taskContainer = document.querySelector('#task-container');
       changeHeader(element.textContent);
-      displayTasks(User.taskList, taskContainer, createTask);
+      displayTasks(User.projectList, taskContainer, createTask);
     });
   });
 };
@@ -339,18 +359,31 @@ function createProjectForm(container) {
     const projectContainer = document.querySelector('#project-container');
     event.preventDefault();
     cleanContainer(taskContainer);
-    User.projectList.push(formInput.value);
-    displayProjects(User.projectList, projectContainer);
+    const newProjectObj = Project(formInput.value, []);
+    const projectObj = newProjectObj.getObjLiteral();
+    User.projectList.push(projectObj);
+    User.currentProjectIndex = User.projectList.indexOf(projectObj);
     console.log(User.projectList);
-    changeHeader(formInput.value);
+    console.log(User.currentProjectIndex);
+    changeHeader(projectObj.title);
+    displayProjects(User.projectList, projectContainer);
     cleanForm();
     const projects = document.querySelectorAll('.nav-project');
-    projects.forEach((project) => {
-      project.addEventListener('click', () => {
-        const str = project.textContent;
-        const newStr = str.slice(0, str.length - 6);
-        changeHeader(newStr);
-        displayTasks(User.taskList, taskContainer, createTask);
+    projects.forEach((project, index) => {
+      project.addEventListener('click', (e) => {
+        if (e.target.parentNode !== project) {
+          const currentIndex = index + 1;
+          console.log(currentIndex);
+          User.currentProjectIndex = currentIndex;
+          const str = User.projectList[currentIndex].title;
+          changeHeader(str);
+          displayTasks(
+            User.projectList,
+            taskContainer,
+            createTask,
+            User.projectList[currentIndex].id,
+          );
+        }
       });
     });
   });
@@ -482,8 +515,10 @@ function createTaskPopUp(container) {
   // this stores and displays the form values
   popUp.addEventListener('submit', (event) => {
     event.preventDefault();
+    const projectId = User.projectList[User.currentProjectIndex].id;
     const taskContainer = document.querySelector('#task-container');
     const isEditing = User.isEditingTask;
+    const defaultProject = User.projectList[User.currentProjectIndex];
     if (isEditing === false) {
       let header = document.querySelector('#header-element').textContent;
       if (header === 'This Week' || header === 'Today') {
@@ -494,9 +529,9 @@ function createTaskPopUp(container) {
         detailsInput.value,
         dueDateInput.value,
         priority,
-        header,
+        defaultProject.id,
       );
-      User.taskList.push(newTask.getObjLiteral());
+      defaultProject.tasks.push(newTask.getObjLiteral());
     } else {
       User.editTask(
         User.currentTaskId,
@@ -506,8 +541,8 @@ function createTaskPopUp(container) {
         priority,
       );
     }
-    console.log(User.taskList);
-    displayTasks(User.taskList, taskContainer, createTask);
+    console.log(User.projectList);
+    displayTasks(User.projectList, taskContainer, createTask, projectId);
     cleanForm();
   });
 }
@@ -546,6 +581,9 @@ function updateDisplay() {
   createTaskPopUp(dynamicDisplay);
   createAddTaskButton(dynamicDisplay);
   createTaskContainer(dynamicDisplay);
+  const defaultProject = Project('default', []);
+  User.projectList.push(defaultProject.getObjLiteral());
+  console.log(User.projectList);
 }
 
 export {
