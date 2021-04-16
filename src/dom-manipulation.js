@@ -107,10 +107,9 @@ function createProject(name, container) {
     'delete',
   );
   projectDelete.setAttribute('id', 'delete-project-button');
-  return {
-    project,
-    projectDelete,
-  };
+  // projectDelete.addEventListener('click', () => {
+
+  // });
 }
 
 function createTask(name, date, priority, container, id, taskIsComplete, details) {
@@ -213,6 +212,26 @@ function createTask(name, date, priority, container, id, taskIsComplete, details
     const taskContainer = document.querySelector('#task-container');
     User.removeTaskFromList(taskId);
     displayTasks(User.taskList, taskContainer, createTask);
+  });
+
+  taskEdit.addEventListener('click', () => {
+    const popUpContainer = document.querySelector('#pop-up-container');
+    const titleInput = document.querySelector('#title-input');
+    const detailsInput = document.querySelector('#details-input');
+    const dateInput = document.querySelector('#due-date-input');
+    const low = document.querySelector('#priority-low');
+    const medium = document.querySelector('#priority-medium');
+    const high = document.querySelector('#priority-high');
+    User.showTaskInfo(
+      taskId,
+      popUpContainer,
+      titleInput,
+      detailsInput,
+      dateInput,
+      low,
+      medium,
+      high,
+    );
   });
 }
 
@@ -464,18 +483,29 @@ function createTaskPopUp(container) {
   popUp.addEventListener('submit', (event) => {
     event.preventDefault();
     const taskContainer = document.querySelector('#task-container');
-    let header = document.querySelector('#header-element').textContent;
-    if (header === 'This Week' || header === 'Today') {
-      header = 'Home';
+    const isEditing = User.isEditingTask;
+    if (isEditing === false) {
+      let header = document.querySelector('#header-element').textContent;
+      if (header === 'This Week' || header === 'Today') {
+        header = 'Home';
+      }
+      const newTask = Task(
+        titleInput.value,
+        detailsInput.value,
+        dueDateInput.value,
+        priority,
+        header,
+      );
+      User.taskList.push(newTask.getObjLiteral());
+    } else {
+      User.editTask(
+        User.currentTaskId,
+        titleInput.value,
+        detailsInput.value,
+        dueDateInput.value,
+        priority,
+      );
     }
-    const newTask = Task(
-      titleInput.value,
-      detailsInput.value,
-      dueDateInput.value,
-      priority,
-      header,
-    );
-    User.taskList.push(newTask.getObjLiteral());
     console.log(User.taskList);
     displayTasks(User.taskList, taskContainer, createTask);
     cleanForm();

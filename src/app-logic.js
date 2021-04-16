@@ -4,6 +4,8 @@
 const userModule = (() => {
   const taskList = [];
   const projectList = [];
+  let isEditingTask = false;
+  let currentTaskId = '';
   function changeTaskStatus(taskId, newBool) {
     for (let i = 0; i < taskList.length; i++) {
       if (taskList[i].id === taskId) {
@@ -19,19 +21,59 @@ const userModule = (() => {
       }
     }
   }
+  // function removeProjectFromList(projectId) {
+
+  // }
+
+  function showTaskInfo(taskId, container, titleElem, detailsElem, dateElem, low, medium, high) {
+    for (let i = 0; i < taskList.length; i++) {
+      if (taskList[i].id === taskId) {
+        if (taskList[i].priority === 'low') {
+          low.setAttribute('id', 'priority-low-checked');
+        } else if (taskList[i].priority === 'medium') {
+          medium.setAttribute('id', 'priority-medium-checked');
+        } else if (taskList[i].priority === 'high') {
+          high.setAttribute('id', 'priority-high-checked');
+        }
+        titleElem.value = taskList[i].title;
+        detailsElem.value = taskList[i].details;
+        dateElem.value = taskList[i].date;
+        userModule.isEditingTask = true;
+        userModule.currentTaskId = taskId;
+      }
+    }
+    container.style.display = 'grid';
+  }
+  function editTask(taskId, title, details, date, priority) {
+    for (let i = 0; i < taskList.length; i++) {
+      if (taskList[i].id === taskId) {
+        taskList[i].title = title;
+        taskList[i].details = details;
+        taskList[i].date = date;
+        taskList[i].priority = priority;
+        userModule.isEditingTask = false;
+        userModule.currentTaskId = '';
+      }
+    }
+  }
   return {
     taskList,
     projectList,
+    isEditingTask,
+    currentTaskId,
     changeTaskStatus,
     removeTaskFromList,
+    showTaskInfo,
+    editTask,
   };
 })();
 
-function projectFactory(name, tasks) {
+function projectFactory(title, tasks) {
   const getObjLiteral = () => {
-    console.log(name);
+    const id = Date.now();
     return {
-      name,
+      id,
+      title,
       tasks,
     };
   };
