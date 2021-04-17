@@ -3417,48 +3417,69 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "projectFactory": () => (/* binding */ projectFactory),
 /* harmony export */   "taskFactory": () => (/* binding */ taskFactory)
 /* harmony export */ });
-/* eslint-disable no-console */
-/* eslint-disable no-plusplus */
-
 const userModule = (() => {
   const projectList = [];
   const isEditingTask = false;
   const currentTaskId = '';
   const currentProjectIndex = 0;
 
+  function populateStorage(arr) {
+    localStorage.setItem('savedProjectList', JSON.stringify(arr));
+  }
+
+  function checkLocalStorage(
+    projectContainer,
+    taskContainer,
+    cbDisplayProjects,
+    cbDisplayTasks,
+    cbCreateTask,
+  ) {
+    if (localStorage.length > 0) {
+      const savedProjectList = localStorage.getItem('savedProjectList');
+      userModule.projectList = JSON.parse(savedProjectList);
+      cbDisplayProjects(userModule.projectList, projectContainer);
+      cbDisplayTasks(userModule.projectList, taskContainer, cbCreateTask);
+    }
+  }
+
   function changeTaskStatus(taskId, newBool) {
-    for (let i = 0; i < projectList.length; i++) {
-      const taskList = projectList[i].tasks;
+    for (let i = 0; i < userModule.projectList.length; i++) {
+      const taskList = userModule.projectList[i].tasks;
       for (let j = 0; j < taskList.length; j++) {
         if (taskList[j].id === taskId) {
           taskList[j].taskIsComplete = newBool;
+          populateStorage(userModule.projectList);
         }
       }
     }
   }
   function removeTaskFromList(taskId) {
-    for (let i = 0; i < projectList.length; i++) {
-      const taskList = projectList[i].tasks;
+    for (let i = 0; i < userModule.projectList.length; i++) {
+      const taskList = userModule.projectList[i].tasks;
       for (let j = 0; j < taskList.length; j++) {
         if (taskList[j].id === taskId) {
           taskList.splice(j, 1);
-          console.log(taskList);
+          populateStorage(userModule.projectList);
         }
       }
     }
   }
   function removeProjectFromList(projectId) {
-    for (let i = 0; i < projectList.length; i++) {
-      if (projectList[i].id === projectId) {
-        projectList.splice(i, 1);
-        console.log(projectList);
+    for (let i = 0; i < userModule.projectList.length; i++) {
+      if (userModule.projectList[i].id === projectId) {
+        userModule.projectList.splice(i, 1);
+        // when a project is deleted from the list the page will go back to 'Home'
+        if (userModule.currentProjectIndex > 0) {
+          userModule.currentProjectIndex -= 1;
+        }
+        populateStorage(userModule.projectList);
       }
     }
   }
 
   function showTaskInfo(taskId, container, titleElem, detailsElem, dateElem, low, medium, high) {
-    for (let i = 0; i < projectList.length; i++) {
-      const taskList = projectList[i].tasks;
+    for (let i = 0; i < userModule.projectList.length; i++) {
+      const taskList = userModule.projectList[i].tasks;
       for (let j = 0; j < taskList.length; j++) {
         if (taskList[j].id === taskId) {
           if (taskList[j].priority === 'low') {
@@ -3479,8 +3500,8 @@ const userModule = (() => {
     container.style.display = 'grid';
   }
   function editTask(taskId, title, details, date, priority) {
-    for (let i = 0; i < projectList.length; i++) {
-      const taskList = projectList[i].tasks;
+    for (let i = 0; i < userModule.projectList.length; i++) {
+      const taskList = userModule.projectList[i].tasks;
       for (let j = 0; j < taskList.length; j++) {
         if (taskList[j].id === taskId) {
           taskList[j].title = title;
@@ -3489,6 +3510,7 @@ const userModule = (() => {
           taskList[j].priority = priority;
           userModule.isEditingTask = false;
           userModule.currentTaskId = '';
+          populateStorage(userModule.projectList);
         }
       }
     }
@@ -3498,6 +3520,8 @@ const userModule = (() => {
     isEditingTask,
     currentTaskId,
     currentProjectIndex,
+    populateStorage,
+    checkLocalStorage,
     changeTaskStatus,
     removeTaskFromList,
     removeProjectFromList,
@@ -3508,6 +3532,7 @@ const userModule = (() => {
 
 function projectFactory(title, tasks) {
   const getObjLiteral = () => {
+    // generates a random id for each project
     const id = Math.floor(Math.random() * 100000);
     return {
       id,
@@ -3529,7 +3554,7 @@ function taskFactory(title, info, date, priority, projectId) {
       details = info;
     }
     const taskIsComplete = false;
-    // generate a random id for each task
+    // generates a random id for each task
     const id = Date.now();
     return {
       id, title, details, date, priority, projectId, taskIsComplete,
@@ -3587,7 +3612,7 @@ function createNewElement(
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "updateDisplay": () => (/* binding */ updateDisplay)
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
 /* harmony import */ var date_fns__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! date-fns */ "./node_modules/date-fns/esm/format/index.js");
 /* harmony import */ var date_fns__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! date-fns */ "./node_modules/date-fns/esm/subDays/index.js");
@@ -3597,7 +3622,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var date_fns__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! date-fns */ "./node_modules/date-fns/esm/isBefore/index.js");
 /* harmony import */ var _dom_manipulation_helper__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./dom-manipulation-helper */ "./src/dom-manipulation-helper.js");
 /* harmony import */ var _app_logic__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./app-logic */ "./src/app-logic.js");
-/* eslint-disable no-plusplus */
 
 
 
@@ -3613,7 +3637,8 @@ function cleanContainer(container) {
   }
 }
 
-function displayTasks(arr, container, callback, projectId = '') {
+// selects the task elements to show according to the header and pass them to createTask
+function displayTasks(arr, container, cbCreateTask, projectId = '') {
   cleanContainer(container);
   const projectName = document.querySelector('#header-element').textContent;
   if (projectName === 'Home') {
@@ -3621,12 +3646,10 @@ function displayTasks(arr, container, callback, projectId = '') {
     for (let i = 0; i < arr.length; i++) {
       const taskList = arr[i].tasks;
       for (let j = 0; j < taskList.length; j++) {
-        // let taskDueDate = format(new Date(arr[i].date),'MMMM do');
-        // callback(arr[i].title, taskDueDate, arr[i].priority,
-        // container, arr[i].id, arr[i].taskIsComplete, arr[i].details,);
-        callback(
+        const taskDueDate = (0,date_fns__WEBPACK_IMPORTED_MODULE_2__.default)(new Date(taskList[j].date), 'MMMM do');
+        cbCreateTask(
           taskList[j].title,
-          taskList[j].date,
+          taskDueDate,
           taskList[j].priority,
           container,
           taskList[j].id,
@@ -3643,7 +3666,7 @@ function displayTasks(arr, container, callback, projectId = '') {
       const todayArr = taskList.filter((task) => task.date === today);
       for (let j = 0; j < todayArr.length; j++) {
         const taskDueDate = (0,date_fns__WEBPACK_IMPORTED_MODULE_2__.default)(new Date(todayArr[j].date), 'MMMM do');
-        callback(
+        cbCreateTask(
           todayArr[j].title,
           taskDueDate,
           todayArr[j].priority,
@@ -3669,7 +3692,7 @@ function displayTasks(arr, container, callback, projectId = '') {
       });
       for (let j = 0; j < thisWeekArr.length; j++) {
         const taskDueDate = (0,date_fns__WEBPACK_IMPORTED_MODULE_2__.default)(new Date(thisWeekArr[j].date), 'MMMM do');
-        callback(
+        cbCreateTask(
           thisWeekArr[j].title,
           taskDueDate,
           thisWeekArr[j].priority,
@@ -3687,7 +3710,7 @@ function displayTasks(arr, container, callback, projectId = '') {
         const taskList = arr[i].tasks;
         for (let j = 0; j < taskList.length; j++) {
           const taskDueDate = (0,date_fns__WEBPACK_IMPORTED_MODULE_2__.default)(new Date(taskList[j].date), 'MMMM do');
-          callback(
+          cbCreateTask(
             taskList[j].title,
             taskDueDate,
             taskList[j].priority,
@@ -3702,6 +3725,7 @@ function displayTasks(arr, container, callback, projectId = '') {
   }
 }
 
+// creates the task element
 function createTask(name, date, priority, container, id, taskIsComplete, details) {
   const taskId = id;
   const task = (0,_dom_manipulation_helper__WEBPACK_IMPORTED_MODULE_0__.default)(container, 'li', 'user-tasks', '');
@@ -3795,7 +3819,6 @@ function createTask(name, date, priority, container, id, taskIsComplete, details
     }
     _app_logic__WEBPACK_IMPORTED_MODULE_1__.userModule.changeTaskStatus(taskId, taskStatus);
     toggleTask(taskStatus);
-    console.log(_app_logic__WEBPACK_IMPORTED_MODULE_1__.userModule.projectList);
   });
 
   taskDelete.addEventListener('click', () => {
@@ -3813,6 +3836,7 @@ function createTask(name, date, priority, container, id, taskIsComplete, details
     const low = document.querySelector('#priority-low');
     const medium = document.querySelector('#priority-medium');
     const high = document.querySelector('#priority-high');
+    // calls the function that will show the task info on the pop-up form
     _app_logic__WEBPACK_IMPORTED_MODULE_1__.userModule.showTaskInfo(
       taskId,
       popUpContainer,
@@ -3826,6 +3850,7 @@ function createTask(name, date, priority, container, id, taskIsComplete, details
   });
 }
 
+// creates the project element
 function createProject(id, name, container, callback) {
   const project = (0,_dom_manipulation_helper__WEBPACK_IMPORTED_MODULE_0__.default)(container, 'div', 'nav-project', '', name);
   const projectDelete = (0,_dom_manipulation_helper__WEBPACK_IMPORTED_MODULE_0__.default)(
@@ -3838,19 +3863,39 @@ function createProject(id, name, container, callback) {
   projectDelete.setAttribute('id', 'delete-project-button');
   projectDelete.addEventListener('click', () => {
     const taskContainer = document.querySelector('#task-container');
+    changeHeader('Home');
     _app_logic__WEBPACK_IMPORTED_MODULE_1__.userModule.removeProjectFromList(id);
-    console.log(_app_logic__WEBPACK_IMPORTED_MODULE_1__.userModule.currentProjectIndex);
-    const projectId = _app_logic__WEBPACK_IMPORTED_MODULE_1__.userModule.projectList[_app_logic__WEBPACK_IMPORTED_MODULE_1__.userModule.currentProjectIndex].id;
     callback(_app_logic__WEBPACK_IMPORTED_MODULE_1__.userModule.projectList, container);
-    displayTasks(_app_logic__WEBPACK_IMPORTED_MODULE_1__.userModule.projectList, taskContainer, createTask, projectId);
+    displayTasks(_app_logic__WEBPACK_IMPORTED_MODULE_1__.userModule.projectList, taskContainer, createTask);
   });
 }
 
+// displays the projects from the project list array and attach an event listener to each of them
 function displayProjects(arr, container) {
   cleanContainer(container);
   for (let i = 1; i < arr.length; i++) {
     createProject(arr[i].id, arr[i].title, container, displayProjects);
   }
+  const projects = document.querySelectorAll('.nav-project');
+  const taskContainer = document.querySelector('#task-container');
+  projects.forEach((project, index) => {
+    project.addEventListener('click', (e) => {
+      // this is so that the delete button doesn't get triggered
+      if (e.target.parentNode !== project) {
+        // this is to ignore projectList[0] because it doesn't belong to the project container
+        const currentIndex = index + 1;
+        _app_logic__WEBPACK_IMPORTED_MODULE_1__.userModule.currentProjectIndex = currentIndex;
+        const str = _app_logic__WEBPACK_IMPORTED_MODULE_1__.userModule.projectList[currentIndex].title;
+        changeHeader(str);
+        displayTasks(
+          _app_logic__WEBPACK_IMPORTED_MODULE_1__.userModule.projectList,
+          taskContainer,
+          createTask,
+          _app_logic__WEBPACK_IMPORTED_MODULE_1__.userModule.projectList[currentIndex].id,
+        );
+      }
+    });
+  });
 }
 
 const createNavbarElements = (container) => {
@@ -3887,6 +3932,12 @@ const createNavbarElements = (container) => {
       displayTasks(_app_logic__WEBPACK_IMPORTED_MODULE_1__.userModule.projectList, taskContainer, createTask);
     });
   });
+  return {
+    appLogo,
+    homeElement,
+    todayElement,
+    thisWeekElement,
+  };
 };
 
 function createProjectForm(container) {
@@ -3947,37 +3998,24 @@ function createProjectForm(container) {
   });
 
   newProjectForm.addEventListener('submit', (event) => {
-    const taskContainer = document.querySelector('#task-container');
-    const projectContainer = document.querySelector('#project-container');
     event.preventDefault();
-    cleanContainer(taskContainer);
-    const newProjectObj = (0,_app_logic__WEBPACK_IMPORTED_MODULE_1__.projectFactory)(formInput.value, []);
-    const projectObj = newProjectObj.getObjLiteral();
-    _app_logic__WEBPACK_IMPORTED_MODULE_1__.userModule.projectList.push(projectObj);
-    _app_logic__WEBPACK_IMPORTED_MODULE_1__.userModule.currentProjectIndex = _app_logic__WEBPACK_IMPORTED_MODULE_1__.userModule.projectList.indexOf(projectObj);
-    console.log(_app_logic__WEBPACK_IMPORTED_MODULE_1__.userModule.projectList);
-    console.log(_app_logic__WEBPACK_IMPORTED_MODULE_1__.userModule.currentProjectIndex);
-    changeHeader(projectObj.title);
-    displayProjects(_app_logic__WEBPACK_IMPORTED_MODULE_1__.userModule.projectList, projectContainer);
-    cleanForm();
-    const projects = document.querySelectorAll('.nav-project');
-    projects.forEach((project, index) => {
-      project.addEventListener('click', (e) => {
-        if (e.target.parentNode !== project) {
-          const currentIndex = index + 1;
-          console.log(currentIndex);
-          _app_logic__WEBPACK_IMPORTED_MODULE_1__.userModule.currentProjectIndex = currentIndex;
-          const str = _app_logic__WEBPACK_IMPORTED_MODULE_1__.userModule.projectList[currentIndex].title;
-          changeHeader(str);
-          displayTasks(
-            _app_logic__WEBPACK_IMPORTED_MODULE_1__.userModule.projectList,
-            taskContainer,
-            createTask,
-            _app_logic__WEBPACK_IMPORTED_MODULE_1__.userModule.projectList[currentIndex].id,
-          );
-        }
-      });
-    });
+    // this is to avoid name conflict in a subsequent function like changeHeader
+    // but I can do something better later on
+    if (formInput.value === 'Home' || formInput.value === 'Today' || formInput.value === 'This Week') {
+      alert('Please use another name!');
+    } else {
+      const taskContainer = document.querySelector('#task-container');
+      const projectContainer = document.querySelector('#project-container');
+      cleanContainer(taskContainer);
+      const newProjectObj = (0,_app_logic__WEBPACK_IMPORTED_MODULE_1__.projectFactory)(formInput.value, []);
+      const projectObj = newProjectObj.getObjLiteral();
+      _app_logic__WEBPACK_IMPORTED_MODULE_1__.userModule.projectList.push(projectObj);
+      _app_logic__WEBPACK_IMPORTED_MODULE_1__.userModule.populateStorage(_app_logic__WEBPACK_IMPORTED_MODULE_1__.userModule.projectList);
+      _app_logic__WEBPACK_IMPORTED_MODULE_1__.userModule.currentProjectIndex = _app_logic__WEBPACK_IMPORTED_MODULE_1__.userModule.projectList.indexOf(projectObj);
+      changeHeader(projectObj.title);
+      displayProjects(_app_logic__WEBPACK_IMPORTED_MODULE_1__.userModule.projectList, projectContainer);
+      cleanForm();
+    }
   });
 }
 
@@ -4058,11 +4096,11 @@ function createTaskPopUp(container) {
   );
 
   titleInput.setAttribute('placeholder', 'Title');
-  // titleInput.setAttribute('required', '');
+  titleInput.setAttribute('required', '');
   detailsInput.setAttribute('placeholder', 'Details');
   dueDateInput.setAttribute('placeholder', 'Due Date');
   dueDateInput.setAttribute('type', 'date');
-  // dueDateInput.setAttribute('required', '');
+  dueDateInput.setAttribute('required', '');
 
   function cleanForm() {
     titleInput.value = '';
@@ -4111,6 +4149,7 @@ function createTaskPopUp(container) {
     const taskContainer = document.querySelector('#task-container');
     const isEditing = _app_logic__WEBPACK_IMPORTED_MODULE_1__.userModule.isEditingTask;
     const defaultProject = _app_logic__WEBPACK_IMPORTED_MODULE_1__.userModule.projectList[_app_logic__WEBPACK_IMPORTED_MODULE_1__.userModule.currentProjectIndex];
+    // if it's a new task it goes here
     if (isEditing === false) {
       let header = document.querySelector('#header-element').textContent;
       if (header === 'This Week' || header === 'Today') {
@@ -4124,6 +4163,8 @@ function createTaskPopUp(container) {
         defaultProject.id,
       );
       defaultProject.tasks.push(newTask.getObjLiteral());
+      _app_logic__WEBPACK_IMPORTED_MODULE_1__.userModule.populateStorage(_app_logic__WEBPACK_IMPORTED_MODULE_1__.userModule.projectList);
+    // if it's a task that's being edited it goes here
     } else {
       _app_logic__WEBPACK_IMPORTED_MODULE_1__.userModule.editTask(
         _app_logic__WEBPACK_IMPORTED_MODULE_1__.userModule.currentTaskId,
@@ -4133,7 +4174,6 @@ function createTaskPopUp(container) {
         priority,
       );
     }
-    console.log(_app_logic__WEBPACK_IMPORTED_MODULE_1__.userModule.projectList);
     displayTasks(_app_logic__WEBPACK_IMPORTED_MODULE_1__.userModule.projectList, taskContainer, createTask, projectId);
     cleanForm();
   });
@@ -4173,12 +4213,24 @@ function updateDisplay() {
   createTaskPopUp(dynamicDisplay);
   createAddTaskButton(dynamicDisplay);
   createTaskContainer(dynamicDisplay);
-  const defaultProject = (0,_app_logic__WEBPACK_IMPORTED_MODULE_1__.projectFactory)('default', []);
-  _app_logic__WEBPACK_IMPORTED_MODULE_1__.userModule.projectList.push(defaultProject.getObjLiteral());
-  console.log(_app_logic__WEBPACK_IMPORTED_MODULE_1__.userModule.projectList);
+  const projectContainer = document.querySelector('#project-container');
+  const taskContainer = document.querySelector('#task-container');
+  // this checks for a saved list in local storage
+  _app_logic__WEBPACK_IMPORTED_MODULE_1__.userModule.checkLocalStorage(
+    projectContainer,
+    taskContainer,
+    displayProjects,
+    displayTasks,
+    createTask,
+  );
+  // if there's no saved list it pushes a new default project to the projectList
+  if (_app_logic__WEBPACK_IMPORTED_MODULE_1__.userModule.projectList === []) {
+    const defaultProject = (0,_app_logic__WEBPACK_IMPORTED_MODULE_1__.projectFactory)('default', []);
+    _app_logic__WEBPACK_IMPORTED_MODULE_1__.userModule.projectList.push(defaultProject.getObjLiteral());
+  }
 }
 
-
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (updateDisplay);
 
 
 /***/ })
@@ -4249,7 +4301,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _dom_manipulation__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./dom-manipulation */ "./src/dom-manipulation.js");
 
 
-(0,_dom_manipulation__WEBPACK_IMPORTED_MODULE_0__.updateDisplay)();
+(0,_dom_manipulation__WEBPACK_IMPORTED_MODULE_0__.default)();
 
 })();
 
