@@ -4224,7 +4224,7 @@ function updateDisplay() {
     createTask,
   );
   // if there's no saved list it pushes a new default project to the projectList
-  if (_app_logic__WEBPACK_IMPORTED_MODULE_1__.userModule.projectList === []) {
+  if (_app_logic__WEBPACK_IMPORTED_MODULE_1__.userModule.projectList.length === 0) {
     const defaultProject = (0,_app_logic__WEBPACK_IMPORTED_MODULE_1__.projectFactory)('default', []);
     _app_logic__WEBPACK_IMPORTED_MODULE_1__.userModule.projectList.push(defaultProject.getObjLiteral());
   }

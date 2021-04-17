@@ -607,7 +607,7 @@ function updateDisplay() {
     createTask,
   );
   // if there's no saved list it pushes a new default project to the projectList
-  if (User.projectList === []) {
+  if (User.projectList.length === 0) {
     const defaultProject = Project('default', []);
     User.projectList.push(defaultProject.getObjLiteral());
   }
