@@ -1,3 +1,3 @@
-import { updateDisplay } from './dom-manipulation';
+import updateDisplay from './dom-manipulation';
 
 updateDisplay();

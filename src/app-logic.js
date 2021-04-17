@@ -1,45 +1,66 @@
-/* eslint-disable no-console */
-/* eslint-disable no-plusplus */
-
 const userModule = (() => {
   const projectList = [];
   const isEditingTask = false;
   const currentTaskId = '';
   const currentProjectIndex = 0;
 
+  function populateStorage(arr) {
+    localStorage.setItem('savedProjectList', JSON.stringify(arr));
+  }
+
+  function checkLocalStorage(
+    projectContainer,
+    taskContainer,
+    cbDisplayProjects,
+    cbDisplayTasks,
+    cbCreateTask,
+  ) {
+    if (localStorage.length > 0) {
+      const savedProjectList = localStorage.getItem('savedProjectList');
+      userModule.projectList = JSON.parse(savedProjectList);
+      cbDisplayProjects(userModule.projectList, projectContainer);
+      cbDisplayTasks(userModule.projectList, taskContainer, cbCreateTask);
+    }
+  }
+
   function changeTaskStatus(taskId, newBool) {
-    for (let i = 0; i < projectList.length; i++) {
-      const taskList = projectList[i].tasks;
+    for (let i = 0; i < userModule.projectList.length; i++) {
+      const taskList = userModule.projectList[i].tasks;
       for (let j = 0; j < taskList.length; j++) {
         if (taskList[j].id === taskId) {
           taskList[j].taskIsComplete = newBool;
+          populateStorage(userModule.projectList);
         }
       }
     }
   }
   function removeTaskFromList(taskId) {
-    for (let i = 0; i < projectList.length; i++) {
-      const taskList = projectList[i].tasks;
+    for (let i = 0; i < userModule.projectList.length; i++) {
+      const taskList = userModule.projectList[i].tasks;
       for (let j = 0; j < taskList.length; j++) {
         if (taskList[j].id === taskId) {
           taskList.splice(j, 1);
-          console.log(taskList);
+          populateStorage(userModule.projectList);
         }
       }
     }
   }
   function removeProjectFromList(projectId) {
-    for (let i = 0; i < projectList.length; i++) {
-      if (projectList[i].id === projectId) {
-        projectList.splice(i, 1);
-        console.log(projectList);
+    for (let i = 0; i < userModule.projectList.length; i++) {
+      if (userModule.projectList[i].id === projectId) {
+        userModule.projectList.splice(i, 1);
+        // when a project is deleted from the list the page will go back to 'Home'
+        if (userModule.currentProjectIndex > 0) {
+          userModule.currentProjectIndex -= 1;
+        }
+        populateStorage(userModule.projectList);
       }
     }
   }
 
   function showTaskInfo(taskId, container, titleElem, detailsElem, dateElem, low, medium, high) {
-    for (let i = 0; i < projectList.length; i++) {
-      const taskList = projectList[i].tasks;
+    for (let i = 0; i < userModule.projectList.length; i++) {
+      const taskList = userModule.projectList[i].tasks;
       for (let j = 0; j < taskList.length; j++) {
         if (taskList[j].id === taskId) {
           if (taskList[j].priority === 'low') {
@@ -60,8 +81,8 @@ const userModule = (() => {
     container.style.display = 'grid';
   }
   function editTask(taskId, title, details, date, priority) {
-    for (let i = 0; i < projectList.length; i++) {
-      const taskList = projectList[i].tasks;
+    for (let i = 0; i < userModule.projectList.length; i++) {
+      const taskList = userModule.projectList[i].tasks;
       for (let j = 0; j < taskList.length; j++) {
         if (taskList[j].id === taskId) {
           taskList[j].title = title;
@@ -70,6 +91,7 @@ const userModule = (() => {
           taskList[j].priority = priority;
           userModule.isEditingTask = false;
           userModule.currentTaskId = '';
+          populateStorage(userModule.projectList);
         }
       }
     }
@@ -79,6 +101,8 @@ const userModule = (() => {
     isEditingTask,
     currentTaskId,
     currentProjectIndex,
+    populateStorage,
+    checkLocalStorage,
     changeTaskStatus,
     removeTaskFromList,
     removeProjectFromList,
@@ -89,6 +113,7 @@ const userModule = (() => {
 
 function projectFactory(title, tasks) {
   const getObjLiteral = () => {
+    // generates a random id for each project
     const id = Math.floor(Math.random() * 100000);
     return {
       id,
@@ -110,7 +135,7 @@ function taskFactory(title, info, date, priority, projectId) {
       details = info;
     }
     const taskIsComplete = false;
-    // generate a random id for each task
+    // generates a random id for each task
     const id = Date.now();
     return {
       id, title, details, date, priority, projectId, taskIsComplete,
