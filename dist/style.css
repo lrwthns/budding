@@ -28,9 +28,10 @@ body {
     background: -webkit-linear-gradient(left,  rgba(229,229,229,1) 0%,rgba(229,229,229,1) 50%,rgba(229,229,229,1) 50%,rgba(210,242,181,1) 100%); /* Chrome10-25,Safari5.1-6 */
     background: linear-gradient(to right,  rgba(229,229,229,1) 0%,rgba(229,229,229,1) 50%,rgba(229,229,229,1) 50%,rgba(210,242,181,1) 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
     filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#e5e5e5', endColorstr='#d2f2b5',GradientType=1 ); /* IE6-9 */
-    display: grid;
-    grid-template-rows: 1fr 0.5fr 4.5fr;
+    display: flex;
+    flex-direction: column;
     padding: 0rem 5rem;
+    padding-top: 2rem;
 }
 
 #app-logo {
@@ -149,15 +150,27 @@ body {
     color: rgb(43, 43, 43);
 }
 
+#sign-in-button {
+    width: 7rem;
+    padding: 0.5rem;
+    font-size: 1.3rem;
+    font-family: 'Karla', sans-serif;
+    position: fixed;
+    top: 0;
+    right: 2rem;
+    /* border: 1px solid green;
+    border-top: none; */
+    background: rgba(229,229,229,1);
+}
+
 #header-element {
-    grid-row: 1/2;
     box-sizing: border-box;
-    align-self: center;
+    align-self: left;
     padding: 3rem 3rem;
     color: rgb(43, 43, 43);
     font-size: 3rem;
     font-family: 'Karla', sans-serif;
-    padding: 1rem;
+    padding: 1.2rem;
 }
 
 #add-task-button {
@@ -364,6 +377,7 @@ input:-webkit-autofill {
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    padding-top: 2rem;
 }
 
 .user-tasks {

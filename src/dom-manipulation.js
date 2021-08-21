@@ -587,11 +587,23 @@ function createTaskContainer(container) {
   return taskContainer;
 }
 
+function createSignInButton(container) {
+  const signIn = createNewElement(
+    container,
+    'button',
+    '',
+    'sign-in-button',
+    'Sign In'
+  );
+  return signIn;
+}
+
 function updateDisplay() {
   const navbar = document.querySelector('#navigation-bar');
   const dynamicDisplay = document.querySelector('#dynamic-display');
   createNavbarElements(navbar);
   createNavbarProjectElements(navbar);
+  createSignInButton(dynamicDisplay);
   createHeaderElement(dynamicDisplay);
   createTaskPopUp(dynamicDisplay);
   createAddTaskButton(dynamicDisplay);

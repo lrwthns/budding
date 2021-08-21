@@ -4204,11 +4204,23 @@ function createTaskContainer(container) {
   return taskContainer;
 }
 
+function createSignInButton(container) {
+  const signIn = (0,_dom_manipulation_helper__WEBPACK_IMPORTED_MODULE_0__.default)(
+    container,
+    'button',
+    '',
+    'sign-in-button',
+    'Sign In'
+  );
+  return signIn;
+}
+
 function updateDisplay() {
   const navbar = document.querySelector('#navigation-bar');
   const dynamicDisplay = document.querySelector('#dynamic-display');
   createNavbarElements(navbar);
   createNavbarProjectElements(navbar);
+  createSignInButton(dynamicDisplay);
   createHeaderElement(dynamicDisplay);
   createTaskPopUp(dynamicDisplay);
   createAddTaskButton(dynamicDisplay);
