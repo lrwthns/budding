@@ -7,7 +7,7 @@ import {
   parseISO,
 } from 'date-fns';
 import createNewElement from './dom-manipulation-helper';
-import { userModule as User, taskFactory as Task, projectFactory as Project } from './app-logic';
+import { userModule as User, taskFactory as Task, projectFactory as Project, signIn } from './app-logic';
 
 function changeHeader(name) {
   const header = document.querySelector('#header-element');
@@ -588,14 +588,16 @@ function createTaskContainer(container) {
 }
 
 function createSignInButton(container) {
-  const signIn = createNewElement(
+  const signInButton = createNewElement(
     container,
     'button',
     '',
     'sign-in-button',
-    'Sign In'
+    'Sign in with Google',
   );
-  return signIn;
+
+  signInButton.addEventListener('click', signIn);
+  return signInButton;
 }
 
 function updateDisplay() {

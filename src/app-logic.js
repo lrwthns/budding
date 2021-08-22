@@ -1,3 +1,7 @@
+import firebase from 'firebase/app';
+import 'firebase/auth';
+import 'firebase/firestore';
+
 const userModule = (() => {
   const projectList = [];
   const isEditingTask = false;
@@ -146,8 +150,34 @@ function taskFactory(title, info, date, priority, projectId) {
   };
 }
 
+// triggers when the auth state change for instance when the user signs-in or signs-out
+function authStateObserver(user) {
+  if (user) { // User is signed in!
+  } else { // User is signed out!
+  }
+}
+
+function signIn() {
+  // sign into Firebase using popup auth & Google as the identity provider
+  const provider = new firebase.auth.GoogleAuthProvider();
+  firebase.auth().signInWithPopup(provider);
+}
+
+function signOut() {
+  firebase.auth().signOut();
+}
+
+// initiates Firebase Auth
+function initFirebaseAuth() {
+  // listens to auth state changes
+  firebase.auth().onAuthStateChanged(authStateObserver);
+}
+
 export {
   userModule,
   projectFactory,
   taskFactory,
+  signIn,
+  signOut,
+  initFirebaseAuth,
 };

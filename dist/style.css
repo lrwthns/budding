@@ -151,16 +151,21 @@ body {
 }
 
 #sign-in-button {
-    width: 7rem;
-    padding: 0.5rem;
+    padding: 1rem;
     font-size: 1.3rem;
     font-family: 'Karla', sans-serif;
     position: fixed;
     top: 0;
     right: 2rem;
-    /* border: 1px solid green;
-    border-top: none; */
-    background: rgba(229,229,229,1);
+    /* border: 1px solid green; */
+    border: none; 
+    background: rgb(43, 43, 43);
+    color: rgb(224, 224, 224);
+}
+
+#sign-in-button:hover {
+    background: rgb(76, 139, 245);
+    color: rgb(255, 255, 255);
 }
 
 #header-element {
@@ -467,4 +472,8 @@ input:-webkit-autofill {
     margin-right: 1rem;
     justify-self: end;
     color: grey;
+}
+
+button {
+    outline: none;
 }
