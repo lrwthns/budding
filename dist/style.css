@@ -150,7 +150,7 @@ body {
     color: rgb(43, 43, 43);
 }
 
-#sign-in-button {
+#sign-in-button, #sign-out-button {
     padding: 1rem;
     font-size: 1.3rem;
     font-family: 'Karla', sans-serif;
@@ -163,7 +163,11 @@ body {
     color: rgb(224, 224, 224);
 }
 
-#sign-in-button:hover {
+#sign-out-button {
+    display: none;
+}
+
+#sign-in-button:hover, #sign-out-button:hover {
     background: rgb(76, 139, 245);
     color: rgb(255, 255, 255);
 }

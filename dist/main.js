@@ -28803,8 +28803,14 @@ function taskFactory(title, info, date, priority, projectId) {
 
 // triggers when the auth state change for instance when the user signs-in or signs-out
 function authStateObserver(user) {
+  const signInButton = document.querySelector('#sign-in-button');
+  const signOutButton = document.querySelector('#sign-out-button');
   if (user) { // User is signed in!
+    signOutButton.style.display = 'block';
+    signInButton.style.display = 'none';
   } else { // User is signed out!
+    signOutButton.style.display = 'none';
+    signInButton.style.display = 'block';
   }
 }
 
@@ -28812,10 +28818,12 @@ function signIn() {
   // sign into Firebase using popup auth & Google as the identity provider
   const provider = new firebase_app__WEBPACK_IMPORTED_MODULE_0__.default.auth.GoogleAuthProvider();
   firebase_app__WEBPACK_IMPORTED_MODULE_0__.default.auth().signInWithPopup(provider);
+  console.log('user is signed in');
 }
 
 function signOut() {
   firebase_app__WEBPACK_IMPORTED_MODULE_0__.default.auth().signOut();
+  console.log('user is signed out');
 }
 
 // initiates Firebase Auth
@@ -29463,7 +29471,7 @@ function createTaskContainer(container) {
   return taskContainer;
 }
 
-function createSignInButton(container) {
+function createAuthButtons(container) {
   const signInButton = (0,_dom_manipulation_helper__WEBPACK_IMPORTED_MODULE_0__.default)(
     container,
     'button',
@@ -29472,8 +29480,16 @@ function createSignInButton(container) {
     'Sign in with Google',
   );
 
+  const signOutButton = (0,_dom_manipulation_helper__WEBPACK_IMPORTED_MODULE_0__.default)(
+    container,
+    'button',
+    '',
+    'sign-out-button',
+    'Sign out',
+  );
+
   signInButton.addEventListener('click', _app_logic__WEBPACK_IMPORTED_MODULE_1__.signIn);
-  return signInButton;
+  signOutButton.addEventListener('click', _app_logic__WEBPACK_IMPORTED_MODULE_1__.signOut);
 }
 
 function updateDisplay() {
@@ -29481,7 +29497,7 @@ function updateDisplay() {
   const dynamicDisplay = document.querySelector('#dynamic-display');
   createNavbarElements(navbar);
   createNavbarProjectElements(navbar);
-  createSignInButton(dynamicDisplay);
+  createAuthButtons(dynamicDisplay);
   createHeaderElement(dynamicDisplay);
   createTaskPopUp(dynamicDisplay);
   createAddTaskButton(dynamicDisplay);

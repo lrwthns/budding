@@ -152,8 +152,14 @@ function taskFactory(title, info, date, priority, projectId) {
 
 // triggers when the auth state change for instance when the user signs-in or signs-out
 function authStateObserver(user) {
+  const signInButton = document.querySelector('#sign-in-button');
+  const signOutButton = document.querySelector('#sign-out-button');
   if (user) { // User is signed in!
+    signOutButton.style.display = 'block';
+    signInButton.style.display = 'none';
   } else { // User is signed out!
+    signOutButton.style.display = 'none';
+    signInButton.style.display = 'block';
   }
 }
 
@@ -161,10 +167,12 @@ function signIn() {
   // sign into Firebase using popup auth & Google as the identity provider
   const provider = new firebase.auth.GoogleAuthProvider();
   firebase.auth().signInWithPopup(provider);
+  console.log('user is signed in');
 }
 
 function signOut() {
   firebase.auth().signOut();
+  console.log('user is signed out');
 }
 
 // initiates Firebase Auth

@@ -7,7 +7,7 @@ import {
   parseISO,
 } from 'date-fns';
 import createNewElement from './dom-manipulation-helper';
-import { userModule as User, taskFactory as Task, projectFactory as Project, signIn } from './app-logic';
+import { userModule as User, taskFactory as Task, projectFactory as Project, signIn, signOut } from './app-logic';
 
 function changeHeader(name) {
   const header = document.querySelector('#header-element');
@@ -587,7 +587,7 @@ function createTaskContainer(container) {
   return taskContainer;
 }
 
-function createSignInButton(container) {
+function createAuthButtons(container) {
   const signInButton = createNewElement(
     container,
     'button',
@@ -596,8 +596,16 @@ function createSignInButton(container) {
     'Sign in with Google',
   );
 
+  const signOutButton = createNewElement(
+    container,
+    'button',
+    '',
+    'sign-out-button',
+    'Sign out',
+  );
+
   signInButton.addEventListener('click', signIn);
-  return signInButton;
+  signOutButton.addEventListener('click', signOut);
 }
 
 function updateDisplay() {
@@ -605,7 +613,7 @@ function updateDisplay() {
   const dynamicDisplay = document.querySelector('#dynamic-display');
   createNavbarElements(navbar);
   createNavbarProjectElements(navbar);
-  createSignInButton(dynamicDisplay);
+  createAuthButtons(dynamicDisplay);
   createHeaderElement(dynamicDisplay);
   createTaskPopUp(dynamicDisplay);
   createAddTaskButton(dynamicDisplay);
