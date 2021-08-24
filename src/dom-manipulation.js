@@ -392,8 +392,8 @@ function createProjectForm(container) {
       cleanContainer(taskContainer);
       const newProjectObj = Project(formInput.value, []);
       const projectObj = newProjectObj.getObjLiteral();
-      User.projectList.push(projectObj);
-      User.populateStorage(User.projectList);
+      // User.projectList.push(projectObj);
+      // User.populateStorage(User.projectList);
       User.currentProjectIndex = User.projectList.indexOf(projectObj);
       changeHeader(projectObj.title);
       displayProjects(User.projectList, projectContainer);
@@ -546,7 +546,7 @@ function createTaskPopUp(container) {
         defaultProject.id,
       );
       defaultProject.tasks.push(newTask.getObjLiteral());
-      User.populateStorage(User.projectList);
+      // User.populateStorage(User.projectList);
     // if it's a task that's being edited it goes here
     } else {
       User.editTask(
@@ -603,7 +603,6 @@ function createAuthButtons(container) {
     'sign-out-button',
     'Sign out',
   );
-
   signInButton.addEventListener('click', signIn);
   signOutButton.addEventListener('click', signOut);
 }
@@ -621,18 +620,18 @@ function updateDisplay() {
   const projectContainer = document.querySelector('#project-container');
   const taskContainer = document.querySelector('#task-container');
   // this checks for a saved list in local storage
-  User.checkLocalStorage(
-    projectContainer,
-    taskContainer,
-    displayProjects,
-    displayTasks,
-    createTask,
-  );
+  // User.checkLocalStorage(
+  //   projectContainer,
+  //   taskContainer,
+  //   displayProjects,
+  //   displayTasks,
+  //   createTask,
+  // );
   // if there's no saved list it pushes a new default project to the projectList
-  if (User.projectList.length === 0) {
-    const defaultProject = Project('default', []);
-    User.projectList.push(defaultProject.getObjLiteral());
-  }
+  // if (User.projectList.length === 0) {
+  //   const defaultProject = Project('default', []);
+  //   User.projectList.push(defaultProject.getObjLiteral());
+  // }
 }
 
 export default updateDisplay;

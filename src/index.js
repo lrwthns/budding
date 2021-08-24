@@ -1,4 +1,5 @@
 import firebase from 'firebase/app';
+import { initFirebaseAuth } from './app-logic';
 import updateDisplay from './dom-manipulation';
 
 const firebaseConfig = {
@@ -11,5 +12,6 @@ const firebaseConfig = {
 };
 
 firebase.initializeApp(firebaseConfig);
+initFirebaseAuth();
 
 updateDisplay();

@@ -8,24 +8,32 @@ const userModule = (() => {
   const currentTaskId = '';
   const currentProjectIndex = 0;
 
-  function populateStorage(arr) {
-    localStorage.setItem('savedProjectList', JSON.stringify(arr));
+  function saveProjectList (obj) {
+    return firebase.firestore().collection('').add(
+      obj
+    ).catch((error) {
+      console.errof('Error writing new ')
+    })
   }
 
-  function checkLocalStorage(
-    projectContainer,
-    taskContainer,
-    cbDisplayProjects,
-    cbDisplayTasks,
-    cbCreateTask,
-  ) {
-    if (localStorage.length > 0) {
-      const savedProjectList = localStorage.getItem('savedProjectList');
-      userModule.projectList = JSON.parse(savedProjectList);
-      cbDisplayProjects(userModule.projectList, projectContainer);
-      cbDisplayTasks(userModule.projectList, taskContainer, cbCreateTask);
-    }
-  }
+  // function populateStorage(arr) {
+  //   localStorage.setItem('savedProjectList', JSON.stringify(arr));
+  // }
+
+  // function checkLocalStorage(
+  //   projectContainer,
+  //   taskContainer,
+  //   cbDisplayProjects,
+  //   cbDisplayTasks,
+  //   cbCreateTask,
+  // ) {
+  //   if (localStorage.length > 0) {
+  //     const savedProjectList = localStorage.getItem('savedProjectList');
+  //     userModule.projectList = JSON.parse(savedProjectList);
+  //     cbDisplayProjects(userModule.projectList, projectContainer);
+  //     cbDisplayTasks(userModule.projectList, taskContainer, cbCreateTask);
+  //   }
+  // }
 
   function changeTaskStatus(taskId, newBool) {
     for (let i = 0; i < userModule.projectList.length; i++) {
@@ -33,7 +41,7 @@ const userModule = (() => {
       for (let j = 0; j < taskList.length; j++) {
         if (taskList[j].id === taskId) {
           taskList[j].taskIsComplete = newBool;
-          populateStorage(userModule.projectList);
+          // populateStorage(userModule.projectList);
         }
       }
     }
@@ -44,7 +52,7 @@ const userModule = (() => {
       for (let j = 0; j < taskList.length; j++) {
         if (taskList[j].id === taskId) {
           taskList.splice(j, 1);
-          populateStorage(userModule.projectList);
+          // populateStorage(userModule.projectList);
         }
       }
     }
@@ -57,7 +65,7 @@ const userModule = (() => {
         if (userModule.currentProjectIndex > 0) {
           userModule.currentProjectIndex -= 1;
         }
-        populateStorage(userModule.projectList);
+        // populateStorage(userModule.projectList);
       }
     }
   }
@@ -95,7 +103,7 @@ const userModule = (() => {
           taskList[j].priority = priority;
           userModule.isEditingTask = false;
           userModule.currentTaskId = '';
-          populateStorage(userModule.projectList);
+          // populateStorage(userModule.projectList);
         }
       }
     }
@@ -105,8 +113,8 @@ const userModule = (() => {
     isEditingTask,
     currentTaskId,
     currentProjectIndex,
-    populateStorage,
-    checkLocalStorage,
+    // populateStorage,
+    // checkLocalStorage,
     changeTaskStatus,
     removeTaskFromList,
     removeProjectFromList,
@@ -150,14 +158,20 @@ function taskFactory(title, info, date, priority, projectId) {
   };
 }
 
+function isUserSignedIn() {
+  return !!firebase.auth().currentUser;
+}
+
 // triggers when the auth state change for instance when the user signs-in or signs-out
 function authStateObserver(user) {
   const signInButton = document.querySelector('#sign-in-button');
   const signOutButton = document.querySelector('#sign-out-button');
   if (user) { // User is signed in!
+    console.log(isUserSignedIn());
     signOutButton.style.display = 'block';
     signInButton.style.display = 'none';
   } else { // User is signed out!
+    console.log(isUserSignedIn());
     signOutButton.style.display = 'none';
     signInButton.style.display = 'block';
   }
@@ -167,12 +181,10 @@ function signIn() {
   // sign into Firebase using popup auth & Google as the identity provider
   const provider = new firebase.auth.GoogleAuthProvider();
   firebase.auth().signInWithPopup(provider);
-  console.log('user is signed in');
 }
 
 function signOut() {
   firebase.auth().signOut();
-  console.log('user is signed out');
 }
 
 // initiates Firebase Auth
@@ -188,4 +200,5 @@ export {
   signIn,
   signOut,
   initFirebaseAuth,
+  isUserSignedIn,
 };
